@@ -17,14 +17,19 @@ tree = app_commands.CommandTree(client)
 @client.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=564698349425655809))
+    await tree.sync(guild=discord.Object(id=1229818432212566118))
     print(f"We have logged in as {client.user}")
 
 
 diplo = app_commands.Group(
-    name="diplo", description="Diplomacy Commands", guild_ids=[564698349425655809]
+    name="diplo",
+    description="Diplomacy Commands",
+    guild_ids=[564698349425655809, 1229818432212566118],
 )
 testing = app_commands.Group(
-    name="testing", description="Testing Commands", guild_ids=[564698349425655809]
+    name="testing",
+    description="Testing Commands",
+    guild_ids=[564698349425655809, 1229818432212566118],
 )
 
 
@@ -35,6 +40,17 @@ testing = app_commands.Group(
 )
 async def test_maturin(interaction, message: str = None):
     await interaction.response.send_message(f"Hello! I am a robot! You said {message}")
+
+
+@testing.command(
+    name="sync_maturin",
+    description="will sync commands with servers",
+    # guild=discord.Object(id=564698349425655809),
+)
+async def test_maturin(interaction):
+    await tree.sync(guild=discord.Object(id=564698349425655809))
+    await tree.sync(guild=discord.Object(id=1229818432212566118))
+    await interaction.response.send_message(f"Commands Synced Successfully!")
 
 
 @diplo.command(

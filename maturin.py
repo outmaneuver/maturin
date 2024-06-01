@@ -26,9 +26,7 @@ diplo = app_commands.Group(
     guild_ids=[564698349425655809, 1229818432212566118],
 )
 testing = app_commands.Group(
-    name="testing",
-    description="Testing Commands",
-    guild_ids=[564698349425655809, 1229818432212566118],
+    name="testing", description="Testing Commands", guild_ids=[564698349425655809]
 )
 
 
@@ -54,7 +52,6 @@ async def sync_maturing(interaction, server: str):
 @diplo.command(
     name="personal_letter",
     description="create a private thread with a user",
-    # guild=discord.Object(id=564698349425655809),
 )
 @app_commands.describe(user="the user you would like to send the letter to")
 async def personal_letter(

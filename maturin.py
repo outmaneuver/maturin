@@ -44,8 +44,8 @@ async def test_maturin(interaction, message: str = None):
     name="sync_maturin",
     description="will sync commands with servers",
 )
-async def test_maturin(interaction, server: int):
-    await tree.sync(guild=discord.Object(id=server))
+async def sync_maturing(interaction, server: str):
+    await tree.sync(guild=discord.Object(id=int(server)))
     await interaction.response.send_message(
         f"Commands Synced with {server} Successfully!"
     )

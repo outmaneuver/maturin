@@ -42,7 +42,7 @@ async def test_maturin(interaction, message: str = None):
     name="sync_maturin",
     description="will sync commands with servers",
 )
-async def sync_maturing(interaction, server: str):
+async def sync_maturin(interaction, server: str):
     await tree.sync(guild=discord.Object(id=int(server)))
     await interaction.response.send_message(
         f"Commands Synced with {server} Successfully!"
@@ -85,7 +85,7 @@ async def personal_letter(
     your_party="the country role of your party",
     other_party="the country role of the other party you want to talk to",
 )
-async def personal_letter(
+async def state_letter(
     interaction: discord.Interaction,
     your_party: discord.Role,
     other_party: discord.Role,

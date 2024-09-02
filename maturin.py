@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+PERSONAL = int(os.getenv("PERSONAL_SERVER"))
+HSKUCW = int(os.getenv("HSKUCW"))
+DIADO = int(os.getenv("DIADO"))
 
 
 intents = discord.Intents.default()
@@ -16,17 +19,17 @@ tree = app_commands.CommandTree(client)
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=564698349425655809))
+    await tree.sync(guild=discord.Object(id=PERSONAL))
     print(f"We have logged in as {client.user}")
 
 
 diplo = app_commands.Group(
     name="diplo",
     description="Diplomacy Commands",
-    guild_ids=[564698349425655809, 1229818432212566118],
+    guild_ids=[PERSONAL, DIADO, HSKUCW],
 )
 testing = app_commands.Group(
-    name="testing", description="Testing Commands", guild_ids=[564698349425655809]
+    name="testing", description="Testing Commands", guild_ids=[PERSONAL, HSKUCW]
 )
 
 
@@ -58,10 +61,11 @@ async def personal_letter(
     interaction: discord.Interaction, user: discord.Member | discord.Role
 ):
     channel = client.get_channel(interaction.channel.id)
-    u_role = get(interaction.guild.roles, name="Umpire")
+    u_role = get(interaction.guild.roles, name="Diplo Umpire")
     s_role = get(interaction.guild.roles, name="Spectator")
+
     thread = await channel.create_thread(
-        name=f"Personal Letters: {interaction.user.name} - {user.name}",
+        name=f"Personal Letters: {interaction.user.nick} - {user.nick}",
         message=None,
         invitable=False,
         slowmode_delay=21600,
@@ -79,7 +83,7 @@ async def personal_letter(
 @diplo.command(
     name="diplomatic_communications",
     description="create a thread for diplomatic communications between states",
-    # guild=discord.Object(id=564698349425655809),
+    # guild=discord.Object(id=PERSONAL),
 )
 @app_commands.describe(
     your_party="the country role of your party",
@@ -91,7 +95,7 @@ async def state_letter(
     other_party: discord.Role,
 ):
     channel = client.get_channel(interaction.channel.id)
-    u_role = get(interaction.guild.roles, name="Umpire")
+    u_role = get(interaction.guild.roles, name="Diplo Umpire")
     s_role = get(interaction.guild.roles, name="Spectator")
     thread = await channel.create_thread(
         name=f"Diplomacy: {your_party.name} - {other_party.name}",

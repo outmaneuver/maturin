@@ -65,7 +65,7 @@ async def personal_letter(
     s_role = get(interaction.guild.roles, name="Spectator")
 
     thread = await channel.create_thread(
-        name=f"Personal Letters: {interaction.user.nick} - {user.nick}",
+        name=f"PL: {interaction.user.nick} - {user.nick}",
         message=None,
         invitable=False,
         slowmode_delay=21600,
@@ -98,7 +98,7 @@ async def state_letter(
     u_role = get(interaction.guild.roles, name="Diplo Umpire")
     s_role = get(interaction.guild.roles, name="Spectator")
     thread = await channel.create_thread(
-        name=f"Diplomacy: {your_party.name} - {other_party.name}",
+        name=f"D: {your_party.name} - {other_party.name}",
         message=None,
         invitable=False,
         slowmode_delay=21600,

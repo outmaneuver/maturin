@@ -1,0 +1,94 @@
+from typing import List
+
+import duckdb
+import pandas as pd
+from duckdb.duckdb import ParserException
+
+# init database connection on load
+
+CONN = duckdb.connect("hsku_local.duckdb")
+
+
+def execute_sql(sql: str, commit: bool = True):
+    """
+    Executes an SQL query on the connected database.
+
+    Args:
+        sql: The SQL query to execute.
+        commit: Whether to commit the transaction after execution.
+
+    Returns:
+        None
+    """
+    try:
+        CONN.execute(sql)
+    except ParserException:
+        print(sql)
+        raise ParserException()
+    if commit:
+        CONN.commit()
+
+
+def get_sql(sql) -> pd.DataFrame:
+    """
+    Executes an SQL query on the connected database.
+
+    Args:
+        sql: The SQL query to execute.
+
+    Returns:
+        A pandas DataFrame containing the results of the query.
+    """
+    try:
+        df = CONN.sql(sql).df()
+    except ParserException:
+        print(sql)
+        raise ParserException()
+    return df
+
+
+def create_table(table_name, tuple_of_fields: List[str]):
+    execute_sql(
+        f"create table if not exists {table_name} ({','.join(tuple_of_fields)})",
+        commit=True,
+    )
+
+
+# function that determines if a user has accessed the bot before
+def user_lookup(id: str) -> pd.DataFrame:
+    sql = f"select user_id, name, nick from users where user_id = {str(id)}"
+    df = get_sql(sql)
+    return df
+
+
+def create_user(id, name, nick):
+    sql = f"insert into users (user_id, name, nick) values ('{str(id)}', '{str(name)}', '{str(nick)}')"
+    execute_sql(sql, commit=True)
+
+
+def get_user_inbox(id: str) -> pd.DataFrame:
+    sql = f"select user_id, personal_inbox_id, personal_inbox_name from threads where user_id = {str(id)}"
+    df = get_sql(sql)
+    return df
+
+
+def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
+    sql = f"insert into threads (user_id, personal_inbox_id, personal_inbox_name) values ('{str(id)}', '{str(personal_inbox_id)}', '{str(personal_inbox_name)}')"
+    execute_sql(sql, commit=True)
+
+
+def initialize():
+    # function for running all the create stable statements
+    users_table = ["user_id varchar unique", "name varchar", "nick varchar"]
+    threads_table = [
+        "user_id varchar unique",
+        "personal_inbox_id varchar",
+        "personal_inbox_name varchar",
+    ]
+
+    for table, name in ((users_table, "users"), (threads_table, "threads")):
+        create_table(name, table)
+
+
+if __name__ == "__main__":
+    initialize()

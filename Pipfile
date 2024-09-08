@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 "discord.py" = "*"
 python-dotenv = "*"
+duckdb = "*"
+pandas = "*"
+pytest = "*"
 
 [dev-packages]
 

@@ -207,21 +207,12 @@ async def send_letter(
 
         # look for thread
         uth = database.get_user_inbox(str(interaction.user.id))
-        if (
-            uth.shape[0] == 0
-            or letter_channel.get_thread(int(uth["personal_inbox_id"])) is None
-        ):
+        if uth.shape[0] == 0:
             # make new thread
             if udf["nick"] == "None":
                 thread_name = f"{udf['name']} Personal Letters"
             else:
                 thread_name = f"{udf['nick']} Personal Letters"
-
-            # # build the recipient letter thread name
-            # if isinstance(recipient, discord.Member):
-            #     thread_name = f"{recipient.nick} Personal Letters"
-            # elif isinstance(recipient, discord.Role):
-            #     thread_name = f"{recipient.name} Letters"
 
             # if thread does not exist create thread
 

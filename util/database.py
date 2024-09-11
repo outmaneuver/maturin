@@ -3,6 +3,7 @@ from typing import List
 import duckdb
 import pandas as pd
 from duckdb.duckdb import ParserException
+from datetime import datetime
 
 # init database connection on load
 
@@ -61,8 +62,19 @@ def user_lookup(id: str) -> pd.DataFrame:
     return df
 
 
+def role_lookup(id: str) -> pd.DataFrame:
+    sql = f"select role_id, name from roles where role_id = {str(id)}"
+    df = get_sql(sql)
+    return df
+
+
 def create_user(id, name, nick):
     sql = f"insert into users (user_id, name, nick) values ('{str(id)}', '{str(name)}', '{str(nick)}')"
+    execute_sql(sql, commit=True)
+
+
+def create_role(id, name):
+    sql = f"insert into roles (role_id, name) values ('{str(id)}', '{str(name)}')"
     execute_sql(sql, commit=True)
 
 
@@ -77,6 +89,21 @@ def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
     execute_sql(sql, commit=True)
 
 
+def create_message(send_id, recp_id, timestp, message):
+    sql = f"insert into messages (sender_id, recipient_id, time, message) values ('{str(send_id)}', '{str(recp_id)}', '{int(timestp)}', '{str(message)}')"
+    execute_sql(sql, commit=True)
+
+
+def check_message_time(send_id, recp_id, chk_time, gap) -> int | None:
+    sql = f"select coalesce(max(time), 1) as mx_tim from messages where sender_id = '{str(send_id)}' and recipient_id = '{str(recp_id)}' and time > {int(chk_time) - int(gap)}"
+    df = get_sql(sql)
+    mx_tim = df.iloc[0].to_dict()["mx_tim"]
+    if mx_tim == 1:
+        return None
+    else:
+        return mx_tim + gap
+
+
 def initialize():
     # function for running all the create stable statements
     users_table = ["user_id varchar unique", "name varchar", "nick varchar"]
@@ -85,8 +112,20 @@ def initialize():
         "personal_inbox_id varchar",
         "personal_inbox_name varchar",
     ]
+    roles_table = ["role_id varchar unique", "name varchar"]
+    messages_table = [
+        "sender_id varchar",
+        "recipient_id varchar",
+        "time int",
+        "message varchar",
+    ]
 
-    for table, name in ((users_table, "users"), (threads_table, "threads")):
+    for table, name in (
+        (users_table, "users"),
+        (threads_table, "threads"),
+        (roles_table, "roles"),
+        (messages_table, "messages"),
+    ):
         create_table(name, table)
 
 

@@ -5,6 +5,7 @@ import pandas as pd
 from discord import app_commands
 from discord.utils import get
 from dotenv import load_dotenv
+from datetime import datetime
 
 from util import database
 
@@ -135,7 +136,11 @@ async def send_letter(
 ):
     u_role = get(interaction.guild.roles, name="Diplo Umpire")
     s_role = get(interaction.guild.roles, name="Spectator")
+    d_role = get(interaction.guild.roles, name="Diplomat")
+    b_role = get(interaction.guild.roles, name="Banker")
+    now_stamp = int(datetime.now().timestamp())
 
+    # letter channel is the base channel that all the threads will be under.
     letter_channel_id = None
     # check to make sure that a letter channel exists
     for channel in interaction.guild.channels:
@@ -146,124 +151,272 @@ async def send_letter(
         raise ValueError
     letter_channel = interaction.guild.get_channel(int(letter_channel_id))
 
-    # check for sender data
-    udf = database.user_lookup(str(interaction.user.id))
-    if udf.shape[0] == 0:
-        # make new user
-        database.create_user(
-            interaction.user.id, interaction.user.name, interaction.user.nick
+    if isinstance(recipient, discord.Role):
+        gp = 14400
+        chk = database.check_message_time(
+            interaction.user.top_role.id, recipient.id, now_stamp, gp
         )
-        udf = database.user_lookup(str(interaction.user.id))
-    elif udf.shape[0] > 1:
-        raise ValueError("unique constraint broken")
-
-    udf = udf.iloc[0].to_dict()
-    # look for thread
-    uth = database.get_user_inbox(str(interaction.user.id))
-    if uth.shape[0] == 0:
-        # make new thread
-        if udf["nick"] == "None":
-            thread_name = f"{udf['name']} Personal Letters"
+    elif isinstance(recipient, discord.Member):
+        if d_role in interaction.user.roles or b_role in interaction.user.roles:
+            gp = 3600
         else:
-            thread_name = f"{udf['nick']} Personal Letters"
-
-        # # build the recipient letter thread name
-        # if isinstance(recipient, discord.Member):
-        #     thread_name = f"{recipient.nick} Personal Letters"
-        # elif isinstance(recipient, discord.Role):
-        #     thread_name = f"{recipient.name} Letters"
-
-        # if thread does not exist create thread
-
-        thread = await letter_channel.create_thread(
-            name=thread_name,
-            message=None,
-            invitable=False,
+            gp = 86400
+        chk = database.check_message_time(
+            interaction.user.id, recipient.id, now_stamp, gp
         )
-        await thread.send(
-            f"{u_role.mention} {s_role.mention} {interaction.user.mention}"
-        )
-
-        # save thread
-        database.create_user_inbox(str(udf["user_id"]), str(thread.id), thread.name)
-        uth = {
-            "user_id": str(interaction.user.id),
-            "personal_inbox_id": str(thread.id),
-            "personal_inbox_name": thread.name,
-        }
-
-    if isinstance(uth, pd.DataFrame):
-        uth = uth.iloc[0].to_dict()
-
-    # resolve recipient name
-    if recipient.nick is None:
-        recp_name = recipient.name
     else:
-        recp_name = recipient.nick
+        chk = None
 
-    # send letter to sender thread
-    thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
-    adj_message = f"Sent letter to {recp_name}: \n```{message}```"
-    await thread.send(adj_message)
+    if chk is not None:
+        if isinstance(recipient, discord.Role):
+            nm = recipient.name
+        elif recipient.nick is None:
+            nm = recipient.name
+        else:
+            nm = recipient.nick
 
-    # make sure recipient has thread
-    rdf = database.user_lookup(str(recipient.id))
-    if rdf.shape[0] == 0:
-        # make new user
-        database.create_user(recipient.id, recipient.name, recipient.nick)
+        await interaction.response.send_message(
+            f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R>",
+            ephemeral=True,
+        )
+        return
+
+    # TODO this needs to be absracted when im not in a rush, for now, icky if statement
+    ### SENDERS WORKFLOW
+    if isinstance(recipient, discord.Member):
+        # check for sender data
+        udf = database.user_lookup(str(interaction.user.id))
+        if udf.shape[0] == 0:
+            # make new user
+            database.create_user(
+                interaction.user.id, interaction.user.name, interaction.user.nick
+            )
+            udf = database.user_lookup(str(interaction.user.id))
+        elif udf.shape[0] > 1:
+            raise ValueError("unique constraint broken")
+
+        udf = udf.iloc[0].to_dict()
+
+        # look for thread
+        uth = database.get_user_inbox(str(interaction.user.id))
+        if uth.shape[0] == 0:
+            # make new thread
+            if udf["nick"] == "None":
+                thread_name = f"{udf['name']} Personal Letters"
+            else:
+                thread_name = f"{udf['nick']} Personal Letters"
+
+            # # build the recipient letter thread name
+            # if isinstance(recipient, discord.Member):
+            #     thread_name = f"{recipient.nick} Personal Letters"
+            # elif isinstance(recipient, discord.Role):
+            #     thread_name = f"{recipient.name} Letters"
+
+            # if thread does not exist create thread
+
+            thread = await letter_channel.create_thread(
+                name=thread_name,
+                message=None,
+                invitable=False,
+            )
+            await thread.send(
+                f"{u_role.mention} {s_role.mention} {interaction.user.mention}"
+            )
+
+            # save thread
+            database.create_user_inbox(str(udf["user_id"]), str(thread.id), thread.name)
+            uth = {
+                "user_id": str(interaction.user.id),
+                "personal_inbox_id": str(thread.id),
+                "personal_inbox_name": thread.name,
+            }
+
+        if isinstance(uth, pd.DataFrame):
+            uth = uth.iloc[0].to_dict()
+
+        # resolve recipient name
+        if recipient.nick is None:
+            recp_name = recipient.name
+        else:
+            recp_name = recipient.nick
+
+        # send letter to sender thread
+        thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
+        adj_message = (
+            f"Sent letter to {recp_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+        )
+        await thread.send(adj_message)
+
+        # make sure recipient has thread
         rdf = database.user_lookup(str(recipient.id))
-    elif rdf.shape[0] > 1:
-        raise ValueError("unqiue constraint broken")
+        if rdf.shape[0] == 0:
+            # make new user
+            database.create_user(recipient.id, recipient.name, recipient.nick)
+            rdf = database.user_lookup(str(recipient.id))
+        elif rdf.shape[0] > 1:
+            raise ValueError("unqiue constraint broken")
 
-    rdf = rdf.iloc[0].to_dict()
-    # look for thread
-    rth = database.get_user_inbox(str(recipient.id))
-    if rth.shape[0] == 0:
-        # make new thread
-        # build the recipient letter thread name
-        if isinstance(recipient, discord.Member):
-            thread_name = f"{recp_name} Personal Letters"
-        elif isinstance(recipient, discord.Role):
-            thread_name = f"{recp_name} Letters"
+        rdf = rdf.iloc[0].to_dict()
+        # look for thread
+        rth = database.get_user_inbox(str(recipient.id))
+        if rth.shape[0] == 0:
+            # make new thread
+            # build the recipient letter thread name
+            if isinstance(recipient, discord.Member):
+                thread_name = f"{recp_name} Personal Letters"
+            elif isinstance(recipient, discord.Role):
+                thread_name = f"{recp_name} Letters"
 
-        # if thread does not exist create thread
+            # if thread does not exist create thread
 
-        thread = await letter_channel.create_thread(
-            name=thread_name,
-            message=None,
-            invitable=False,
+            thread = await letter_channel.create_thread(
+                name=thread_name,
+                message=None,
+                invitable=False,
+            )
+            await thread.send(f"{u_role.mention} {s_role.mention} {recipient.mention}")
+
+            # save thread
+            database.create_user_inbox(str(rdf["user_id"]), str(thread.id), thread.name)
+            rth = {
+                "user_id": str(rdf["user_id"]),
+                "personal_inbox_id": str(thread.id),
+                "personal_inbox_name": thread.name,
+            }
+
+        if isinstance(rth, pd.DataFrame):
+            rth = rth.iloc[0].to_dict()
+
+        # resolve sender name
+        if interaction.user.nick is None:
+            sender_name = interaction.user.name
+        else:
+            sender_name = interaction.user.nick
+
+        # send letter to recipient thread
+        thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
+        adj_message = (
+            f"Letter from {sender_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
         )
-        await thread.send(f"{u_role.mention} {s_role.mention} {recipient.mention}")
+        await thread.send(adj_message)
 
-        # save thread
-        database.create_user_inbox(str(rdf["user_id"]), str(thread.id), thread.name)
-        rth = {
-            "user_id": str(rdf["user_id"]),
-            "personal_inbox_id": str(thread.id),
-            "personal_inbox_name": thread.name,
-        }
+        # save message to message table
+        database.create_message(udf["user_id"], rdf["user_id"], now_stamp, message)
 
-    if isinstance(rth, pd.DataFrame):
-        rth = rth.iloc[0].to_dict()
+        await interaction.response.send_message(
+            f"Sent letter to {recp_name}, next in <t:{now_stamp + gp}:R>",
+            ephemeral=True,
+        )
 
-    # resolve sender name
-    if interaction.user.nick is None:
-        sender_name = interaction.user.name
-    else:
-        sender_name = interaction.user.nick
+    ### ROLES WORKFLOW
+    elif isinstance(recipient, discord.Role):
+        # check for sender data
+        udf = database.role_lookup(str(interaction.user.top_role.id))
+        if udf.shape[0] == 0:
+            # make new user
+            database.create_role(
+                interaction.user.top_role.id,
+                interaction.user.top_role.name,
+            )
+            udf = database.role_lookup(str(interaction.user.top_role.id))
+        elif udf.shape[0] > 1:
+            raise ValueError("unique constraint broken")
 
-    # send letter to recipient thread
-    thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
-    adj_message = f"Letter from {sender_name}: \n```{message}```"
-    await thread.send(adj_message)
+        udf = udf.iloc[0].to_dict()
 
-    await interaction.response.send_message(
-        f"Sent letter to {recp_name}",
-        ephemeral=True,
-    )
+        # look for thread
+        uth = database.get_user_inbox(str(interaction.user.top_role.id))
+        if uth.shape[0] == 0:
+            # make new thread
+            thread_name = f"{udf['name']} State Letters"
 
-    # TODO - add timegates to prevent letters
-    # TODO - tweak formatting - see if we can get a good template
+            thread = await letter_channel.create_thread(
+                name=thread_name,
+                message=None,
+                invitable=False,
+            )
+            await thread.send(
+                f"{u_role.mention} {s_role.mention} {interaction.user.top_role.mention}"
+            )
+
+            # save thread
+            database.create_user_inbox(str(udf["role_id"]), str(thread.id), thread.name)
+            uth = {
+                "role_id": str(interaction.user.top_role.id),
+                "personal_inbox_id": str(thread.id),
+                "personal_inbox_name": thread.name,
+            }
+
+        if isinstance(uth, pd.DataFrame):
+            uth = uth.iloc[0].to_dict()
+
+        # resolve recipient name
+        recp_name = recipient.name
+
+        if interaction.user.nick is None:
+            s_n = interaction.user.name
+        else:
+            s_n = interaction.user.nick
+
+        # send letter to sender thread
+        thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
+        adj_message = f"{s_n.title()} sent state letter to {recp_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+        await thread.send(adj_message)
+
+        # make sure recipient has thread
+        rdf = database.role_lookup(str(recipient.id))
+        if rdf.shape[0] == 0:
+            # make new user
+            database.create_role(recipient.id, recipient.name)
+            rdf = database.role_lookup(str(recipient.id))
+        elif rdf.shape[0] > 1:
+            raise ValueError("unqiue constraint broken")
+
+        rdf = rdf.iloc[0].to_dict()
+        # look for thread
+        rth = database.get_user_inbox(str(recipient.id))
+        if rth.shape[0] == 0:
+            # make new thread
+            # build the recipient letter thread name
+            thread_name = f"{recp_name} State Letters"
+
+            # if thread does not exist create thread
+
+            thread = await letter_channel.create_thread(
+                name=thread_name,
+                message=None,
+                invitable=False,
+            )
+            await thread.send(f"{u_role.mention} {s_role.mention} {recipient.mention}")
+
+            # save thread
+            database.create_user_inbox(str(rdf["role_id"]), str(thread.id), thread.name)
+            rth = {
+                "role_id": str(rdf["role_id"]),
+                "personal_inbox_id": str(thread.id),
+                "personal_inbox_name": thread.name,
+            }
+
+        if isinstance(rth, pd.DataFrame):
+            rth = rth.iloc[0].to_dict()
+
+        # resolve sender name
+        sender_name = interaction.user.top_role.name
+
+        # send letter to recipient thread
+        thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
+        adj_message = (
+            f"Letter from {sender_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+        )
+        await thread.send(adj_message)
+
+        # save message to message table
+        database.create_message(udf["role_id"], rdf["role_id"], now_stamp, message)
+
+        await interaction.response.send_message(
+            f"Sent letter to {recp_name}, next in <t:{now_stamp + gp}:R>",
+            ephemeral=True,
+        )
 
 
 tree.add_command(diplo)

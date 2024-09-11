@@ -10,19 +10,24 @@ from datetime import datetime
 CONN = duckdb.connect("hsku_local.duckdb")
 
 
-def execute_sql(sql: str, commit: bool = True):
+def execute_sql(sql: str, commit: bool = True, params: list = None):
     """
     Executes an SQL query on the connected database.
 
     Args:
-        sql: The SQL query to execute.
-        commit: Whether to commit the transaction after execution.
+        :sql The SQL query to execute.
+        :commit Whether to commit the transaction after execution.
+        :param params:
 
     Returns:
         None
+
     """
     try:
-        CONN.execute(sql)
+        if params is not None:
+            CONN.execute(sql, params)
+        else:
+            CONN.execute(sql)
     except ParserException:
         print(sql)
         raise ParserException()
@@ -92,13 +97,18 @@ def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
 def create_message(send_id, recp_id, timestp, message):
     sql = f"""
     insert into messages (sender_id, recipient_id, time, message) 
-    values (
-        '{str(send_id)}', 
-        '{str(recp_id)}', 
-        '{int(timestp)}', 
-        '{str(message.replace("'","").replace(";", ""))}')
+    values (?, ?, ?, ?)
     """
-    execute_sql(sql, commit=True)
+    execute_sql(
+        sql,
+        commit=True,
+        params=[
+            str(send_id),
+            str(recp_id),
+            int(timestp),
+            str(message.replace("'", "").replace(";", "")),
+        ],
+    )
 
 
 def check_message_time(send_id, recp_id, chk_time, gap) -> int | None:

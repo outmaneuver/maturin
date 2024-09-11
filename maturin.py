@@ -140,6 +140,14 @@ async def send_letter(
     b_role = get(interaction.guild.roles, name="Banker")
     now_stamp = int(datetime.now().timestamp())
 
+    max_letter_size = 1900
+    if len(message) > max_letter_size:
+        await interaction.response.send_message(
+            f"Sorry, your postal system can only handle messages less than {max_letter_size} at this time.",
+            ephemeral=True,
+        )
+        return
+
     # letter channel is the base channel that all the threads will be under.
     letter_channel_id = None
     # check to make sure that a letter channel exists
@@ -199,7 +207,10 @@ async def send_letter(
 
         # look for thread
         uth = database.get_user_inbox(str(interaction.user.id))
-        if uth.shape[0] == 0:
+        if (
+            uth.shape[0] == 0
+            or letter_channel.get_thread(int(uth["personal_inbox_id"])) is None
+        ):
             # make new thread
             if udf["nick"] == "None":
                 thread_name = f"{udf['name']} Personal Letters"
@@ -223,7 +234,7 @@ async def send_letter(
                 f"{u_role.mention} {s_role.mention} {interaction.user.mention}"
             )
 
-            # save thread
+            # save thread - TODO needs to overwrite if a bad thread exists
             database.create_user_inbox(str(udf["user_id"]), str(thread.id), thread.name)
             uth = {
                 "user_id": str(interaction.user.id),

@@ -90,7 +90,14 @@ def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
 
 
 def create_message(send_id, recp_id, timestp, message):
-    sql = f"insert into messages (sender_id, recipient_id, time, message) values ('{str(send_id)}', '{str(recp_id)}', '{int(timestp)}', '{str(message)}')"
+    sql = f"""
+    insert into messages (sender_id, recipient_id, time, message) 
+    values (
+        '{str(send_id)}', 
+        '{str(recp_id)}', 
+        '{int(timestp)}', 
+        '{str(message.replace("'","").replace(";", ""))}')
+    """
     execute_sql(sql, commit=True)
 
 

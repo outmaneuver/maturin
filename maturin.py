@@ -171,7 +171,7 @@ async def send_letter(
         if d_role in interaction.user.roles or b_role in interaction.user.roles:
             gp = 3600
         else:
-            gp = 86400
+            gp = 72000
         chk = database.check_message_time(
             interaction.user.id, recipient.id, now_stamp, gp
         )

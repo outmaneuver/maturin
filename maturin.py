@@ -210,7 +210,8 @@ async def send_letter(
 
         # look for thread
         uth = database.get_user_inbox(str(interaction.user.id))
-        uth = uth.iloc[0].to_dict()
+        if uth.shape[0] > 0:
+            uth = uth.iloc[0].to_dict()
 
         thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
         if thread is None:
@@ -270,7 +271,8 @@ async def send_letter(
         rdf = rdf.iloc[0].to_dict()
         # look for thread
         rth = database.get_user_inbox(str(recipient.id))
-        rth = rth.iloc[0].to_dict()
+        if rth.shape[0] > 0:
+            rth = rth.iloc[0].to_dict()
 
         thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
         if thread is None:

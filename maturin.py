@@ -138,6 +138,7 @@ async def send_letter(
     s_role = get(interaction.guild.roles, name="Spectator")
     d_role = get(interaction.guild.roles, name="Diplomat")
     b_role = get(interaction.guild.roles, name="Banker")
+    n_role = get(interaction.guild.roles, name="Newspaper Writer")
     now_stamp = int(datetime.now().timestamp())
 
     max_letter_size = 1900
@@ -190,7 +191,7 @@ async def send_letter(
         return
 
     # TODO this needs to be absracted when im not in a rush, for now, icky if statement
-    ### SENDERS WORKFLOW
+    ### PLAYERS WORKFLOW
     if isinstance(recipient, discord.Member):
         # check for sender data
         udf = database.user_lookup(str(interaction.user.id))
@@ -207,7 +208,12 @@ async def send_letter(
 
         # look for thread
         uth = database.get_user_inbox(str(interaction.user.id))
-        if uth.shape[0] == 0:
+
+        if isinstance(uth, pd.DataFrame):
+            uth = uth.iloc[0].to_dict()
+
+        thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
+        if uth.shape[0] == 0 or thread is None:
             # make new thread
             if udf["nick"] == "None":
                 thread_name = f"{udf['name']} Personal Letters"
@@ -226,15 +232,19 @@ async def send_letter(
             )
 
             # save thread - TODO needs to overwrite if a bad thread exists
-            database.create_user_inbox(str(udf["user_id"]), str(thread.id), thread.name)
+            try:
+                database.create_user_inbox(
+                    str(udf["user_id"]), str(thread.id), thread.name
+                )
+            except:
+                database.update_user_inbox(
+                    str(udf["user_id"]), str(thread.id), thread.name
+                )
             uth = {
                 "user_id": str(interaction.user.id),
                 "personal_inbox_id": str(thread.id),
                 "personal_inbox_name": thread.name,
             }
-
-        if isinstance(uth, pd.DataFrame):
-            uth = uth.iloc[0].to_dict()
 
         # resolve recipient name
         if recipient.nick is None:
@@ -243,9 +253,8 @@ async def send_letter(
             recp_name = recipient.nick
 
         # send letter to sender thread
-        thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
         adj_message = (
-            f"Sent letter to {recp_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+            f"Sent letter to **{recp_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
         )
         await thread.send(adj_message)
 
@@ -261,6 +270,11 @@ async def send_letter(
         rdf = rdf.iloc[0].to_dict()
         # look for thread
         rth = database.get_user_inbox(str(recipient.id))
+
+        if isinstance(rth, pd.DataFrame):
+            rth = rth.iloc[0].to_dict()
+
+        thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
         if rth.shape[0] == 0:
             # make new thread
             # build the recipient letter thread name
@@ -279,15 +293,19 @@ async def send_letter(
             await thread.send(f"{u_role.mention} {s_role.mention} {recipient.mention}")
 
             # save thread
-            database.create_user_inbox(str(rdf["user_id"]), str(thread.id), thread.name)
+            try:
+                database.create_user_inbox(
+                    str(rdf["user_id"]), str(thread.id), thread.name
+                )
+            except:
+                database.update_user_inbox(
+                    str(rdf["user_id"]), str(thread.id), thread.name
+                )
             rth = {
                 "user_id": str(rdf["user_id"]),
                 "personal_inbox_id": str(thread.id),
                 "personal_inbox_name": thread.name,
             }
-
-        if isinstance(rth, pd.DataFrame):
-            rth = rth.iloc[0].to_dict()
 
         # resolve sender name
         if interaction.user.nick is None:
@@ -296,9 +314,9 @@ async def send_letter(
             sender_name = interaction.user.nick
 
         # send letter to recipient thread
-        thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
+
         adj_message = (
-            f"Letter from {sender_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+            f"Letter from **{sender_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
         )
         await thread.send(adj_message)
 
@@ -306,7 +324,7 @@ async def send_letter(
         database.create_message(udf["user_id"], rdf["user_id"], now_stamp, message)
 
         await interaction.response.send_message(
-            f"Sent letter to {recp_name}, next in <t:{now_stamp + gp}:R>",
+            f"Sent letter to **{recp_name}**, next in <t:{now_stamp + gp}:R>",
             ephemeral=True,
         )
 
@@ -332,22 +350,27 @@ async def send_letter(
             # make new thread
             thread_name = f"{udf['name']} State Letters"
 
-            thread = await letter_channel.create_thread(
-                name=thread_name,
-                message=None,
-                invitable=False,
-            )
-            await thread.send(
-                f"{u_role.mention} {s_role.mention} {interaction.user.top_role.mention}"
-            )
+            ## if it's being sent to a newspaper writer, don't do it
+            if recipient != n_role:
 
-            # save thread
-            database.create_user_inbox(str(udf["role_id"]), str(thread.id), thread.name)
-            uth = {
-                "role_id": str(interaction.user.top_role.id),
-                "personal_inbox_id": str(thread.id),
-                "personal_inbox_name": thread.name,
-            }
+                thread = await letter_channel.create_thread(
+                    name=thread_name,
+                    message=None,
+                    invitable=False,
+                )
+                await thread.send(
+                    f"{u_role.mention} {s_role.mention} {interaction.user.top_role.mention}"
+                )
+
+                # save thread
+                database.create_user_inbox(
+                    str(udf["role_id"]), str(thread.id), thread.name
+                )
+                uth = {
+                    "role_id": str(interaction.user.top_role.id),
+                    "personal_inbox_id": str(thread.id),
+                    "personal_inbox_name": thread.name,
+                }
 
         if isinstance(uth, pd.DataFrame):
             uth = uth.iloc[0].to_dict()
@@ -360,10 +383,13 @@ async def send_letter(
         else:
             s_n = interaction.user.nick
 
-        # send letter to sender thread
-        thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
-        adj_message = f"{s_n.title()} sent state letter to {recp_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
-        await thread.send(adj_message)
+        ## if it's being sent to a newspaper writer, don't do it
+        if recipient != n_role:
+
+            # send letter to sender thread
+            thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
+            adj_message = f"**{s_n.title()}** sent state letter to **{recp_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
+            await thread.send(adj_message)
 
         # make sure recipient has thread
         rdf = database.role_lookup(str(recipient.id))
@@ -408,7 +434,7 @@ async def send_letter(
         # send letter to recipient thread
         thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
         adj_message = (
-            f"Letter from {sender_name}: \n```{message}```\nAt <t:{now_stamp}:f>"
+            f"Letter from **{sender_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
         )
         await thread.send(adj_message)
 
@@ -416,7 +442,7 @@ async def send_letter(
         database.create_message(udf["role_id"], rdf["role_id"], now_stamp, message)
 
         await interaction.response.send_message(
-            f"Sent letter to {recp_name}, next in <t:{now_stamp + gp}:R>",
+            f"Sent letter to **{recp_name}**, next in <t:{now_stamp + gp}:R>",
             ephemeral=True,
         )
 

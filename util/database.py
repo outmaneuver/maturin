@@ -90,8 +90,25 @@ def get_user_inbox(id: str) -> pd.DataFrame:
 
 
 def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
-    sql = f"insert into threads (user_id, personal_inbox_id, personal_inbox_name) values ('{str(id)}', '{str(personal_inbox_id)}', '{str(personal_inbox_name)}')"
-    execute_sql(sql, commit=True)
+    sql = f"insert into threads (user_id, personal_inbox_id, personal_inbox_name) values (?, ?, ?)"
+    execute_sql(
+        sql,
+        commit=True,
+        params=[str(id), str(personal_inbox_id), str(personal_inbox_name)],
+    )
+
+
+def update_user_inbox(id, personal_inbox_id, personal_inbox_name):
+    sql = f"""
+    update threads
+    set personal_inbox_id = ?, personal_inbox_name = ?
+    where user_id = {str(id)}
+    """
+    execute_sql(
+        sql,
+        commit=True,
+        params=[str(id), str(personal_inbox_id), str(personal_inbox_name)],
+    )
 
 
 def create_message(send_id, recp_id, timestp, message):

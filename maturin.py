@@ -209,7 +209,7 @@ async def send_letter(
         # look for thread
         uth = database.get_user_inbox(str(interaction.user.id))
 
-        if isinstance(uth, pd.DataFrame):
+        if isinstance(uth, pd.DataFrame) and uth.shape[0] >= 1:
             uth = uth.iloc[0].to_dict()
 
         thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
@@ -271,7 +271,7 @@ async def send_letter(
         # look for thread
         rth = database.get_user_inbox(str(recipient.id))
 
-        if isinstance(rth, pd.DataFrame):
+        if isinstance(rth, pd.DataFrame) and rth.shape[0] >= 1:
             rth = rth.iloc[0].to_dict()
 
         thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))

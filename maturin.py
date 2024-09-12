@@ -165,6 +165,8 @@ async def send_letter(
         chk = database.check_message_time(
             interaction.user.top_role.id, recipient.id, now_stamp, gp
         )
+        if recipient == n_role:
+            chk = None
     elif isinstance(recipient, discord.Member):
         if d_role in interaction.user.roles or b_role in interaction.user.roles:
             gp = 3600

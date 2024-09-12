@@ -102,7 +102,7 @@ def update_user_inbox(id, personal_inbox_id, personal_inbox_name):
     sql = f"""
     update threads
     set personal_inbox_id = ?, personal_inbox_name = ?
-    where user_id = {str(id)}
+    where user_id = '{str(id)}'
     """
     execute_sql(
         sql,

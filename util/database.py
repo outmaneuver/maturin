@@ -107,7 +107,7 @@ def update_user_inbox(id, personal_inbox_id, personal_inbox_name):
     execute_sql(
         sql,
         commit=True,
-        params=[str(id), str(personal_inbox_id), str(personal_inbox_name)],
+        params=[str(personal_inbox_id), str(personal_inbox_name)],
     )
 
 

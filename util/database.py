@@ -74,8 +74,12 @@ def role_lookup(id: str) -> pd.DataFrame:
 
 
 def create_user(id, name, nick):
-    sql = f"insert into users (user_id, name, nick) values ('{str(id)}', '{str(name)}', '{str(nick)}')"
-    execute_sql(sql, commit=True)
+    sql = f"insert into users (user_id, name, nick) values (?, ?, ?)"
+    execute_sql(
+        sql,
+        commit=True,
+        params=[str(id), str(name), str(nick).replace(";", "").replace("'", "")],
+    )
 
 
 def create_role(id, name):

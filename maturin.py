@@ -141,13 +141,13 @@ async def send_letter(
     n_role = get(interaction.guild.roles, name="Newspaper Writer")
     now_stamp = int(datetime.now().timestamp())
 
-    max_letter_size = 1900
-    if len(message) > max_letter_size:
-        await interaction.response.send_message(
-            f"Sorry, your postal system can only handle messages less than {max_letter_size} at this time.",
-            ephemeral=True,
-        )
-        return
+    # max_letter_size = 1900
+    # if len(message) > max_letter_size:
+    #     await interaction.response.send_message(
+    #         f"Sorry, your postal system can only handle messages less than {max_letter_size} at this time. {message}",
+    #         ephemeral=True,
+    #     )
+    #     return
 
     # letter channel is the base channel that all the threads will be under.
     letter_channel_id = None
@@ -256,10 +256,12 @@ async def send_letter(
             recp_name = recipient.nick
 
         # send letter to sender thread
-        adj_message = (
-            f"Sent letter to **{recp_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
-        )
-        await thread.send(adj_message)
+        for i in range(0, len(message), 1900):
+            if i == 0:
+                adj_message = f"Sent letter to **{recp_name}**: \n```{message[i : i + 1900]}```\nAt <t:{now_stamp}:f>"
+            else:
+                adj_message = f"Continuing letter to **{recp_name}**: \n```{message[i : i + 1900]}```\nAt <t:{now_stamp}:f>"
+            await thread.send(adj_message)
 
         # make sure recipient has thread
         rdf = database.user_lookup(str(recipient.id))
@@ -318,11 +320,12 @@ async def send_letter(
             sender_name = interaction.user.nick
 
         # send letter to recipient thread
-
-        adj_message = (
-            f"Letter from **{sender_name}**: \n```{message}```\nAt <t:{now_stamp}:f>"
-        )
-        await thread.send(adj_message)
+        for i in range(0, len(message), 1900):
+            if i == 0:
+                adj_message = f"Letter from **{recp_name}**: \n```{message[i : i + 1900]}```\nAt <t:{now_stamp}:f>"
+            else:
+                adj_message = f"Continuing letter to **{recp_name}**: \n```{message[i : i + 1900]}```\nAt <t:{now_stamp}:f>"
+            await thread.send(adj_message)
 
         # save message to message table
         database.create_message(udf["user_id"], rdf["user_id"], now_stamp, message)

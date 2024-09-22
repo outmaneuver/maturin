@@ -187,7 +187,7 @@ async def send_letter(
             nm = recipient.nick
 
         await interaction.response.send_message(
-            f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R>",
+            f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n ```{message}```",
             ephemeral=True,
         )
         return

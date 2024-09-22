@@ -186,10 +186,21 @@ async def send_letter(
         else:
             nm = recipient.nick
 
-        await interaction.response.send_message(
-            f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n ```{message}```",
-            ephemeral=True,
-        )
+        if len(message) < 1900:
+            await interaction.response.send_message(
+                f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n ```{message}```",
+                ephemeral=True,
+            )
+        else:
+            for i in range(0, len(message), 1900):
+                if i == 0:
+                    adj_message = f"Failed to send: \n ```{message[i : i + 1900]}```"
+                else:
+                    adj_message = (
+                        f"Continuing failed to send: \n ```{message[i : i + 1900]}```"
+                    )
+                await interaction.user.dm_channel.send(adj_message)
+
         return
 
     # TODO this needs to be absracted when im not in a rush, for now, icky if statement
@@ -234,7 +245,6 @@ async def send_letter(
                 f"{u_role.mention} {s_role.mention} {interaction.user.mention}"
             )
 
-            # save thread - TODO needs to overwrite if a bad thread exists
             try:
                 database.create_user_inbox(
                     str(udf["user_id"]), str(thread.id), thread.name

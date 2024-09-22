@@ -259,7 +259,7 @@ async def send_letter(
         for i in range(0, len(message), 1900):
             if i == 0:
                 adj_message = (
-                    f"Sent letter to **{recp_name}**: \n```{message[i : i + 1900]}```>"
+                    f"Sent letter to **{recp_name}**: \n```{message[i : i + 1900]}```"
                 )
             else:
                 adj_message = f"Continuing letter to **{recp_name}**: \n```{message[i : i + 1900]}```"
@@ -325,10 +325,10 @@ async def send_letter(
         for i in range(0, len(message), 1900):
             if i == 0:
                 adj_message = (
-                    f"Letter from **{recp_name}**: \n```{message[i : i + 1900]}```>"
+                    f"Letter from **{recp_name}**: \n```{message[i : i + 1900]}```"
                 )
             else:
-                adj_message = f"Continuing letter to **{recp_name}**: \n```{message[i : i + 1900]}```>"
+                adj_message = f"Continuing letter from **{recp_name}**: \n```{message[i : i + 1900]}```"
             await thread.send(adj_message)
 
         # save message to message table
@@ -399,8 +399,12 @@ async def send_letter(
 
             # send letter to sender thread
             thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
-            adj_message = f"**{s_n.title()}** sent state letter to **{recp_name}**: \n```{message}```>"
-            await thread.send(adj_message)
+            for i in range(0, len(message), 1900):
+                if i == 0:
+                    adj_message = f"**{s_n.title()}** sent state letter to **{recp_name}**: \n```{message[i : i + 1900]}```"
+                else:
+                    adj_message = f"continuing statue letter from **{s_n.title()}** to **{recp_name}**: \n```{message[i : i + 1900]}```"
+                await thread.send(adj_message)
 
         # make sure recipient has thread
         rdf = database.role_lookup(str(recipient.id))
@@ -444,8 +448,15 @@ async def send_letter(
 
         # send letter to recipient thread
         thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
-        adj_message = f"Letter from **{sender_name}**: \n```{message}```>"
-        await thread.send(adj_message)
+
+        for i in range(0, len(message), 1900):
+            if i == 0:
+                adj_message = (
+                    f"Letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
+                )
+            else:
+                adj_message = f"continuing letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
+            await thread.send(adj_message)
 
         # save message to message table
         database.create_message(udf["role_id"], rdf["role_id"], now_stamp, message)

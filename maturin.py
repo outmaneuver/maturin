@@ -192,6 +192,7 @@ async def send_letter(
                 ephemeral=True,
             )
         else:
+            chann = await interaction.user.create_dm()
             for i in range(0, len(message), 1900):
                 if i == 0:
                     adj_message = f"Failed to send: \n ```{message[i : i + 1900]}```"
@@ -199,8 +200,7 @@ async def send_letter(
                     adj_message = (
                         f"Continuing failed to send: \n ```{message[i : i + 1900]}```"
                     )
-                await interaction.user.dm_channel.send(adj_message)
-
+                await chann.send(adj_message)
         return
 
     # TODO this needs to be absracted when im not in a rush, for now, icky if statement

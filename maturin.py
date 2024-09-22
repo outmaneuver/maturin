@@ -339,10 +339,10 @@ async def send_letter(
         for i in range(0, len(message), 1900):
             if i == 0:
                 adj_message = (
-                    f"Letter from **{recp_name}**: \n```{message[i : i + 1900]}```"
+                    f"Letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
                 )
             else:
-                adj_message = f"Continuing letter from **{recp_name}**: \n```{message[i : i + 1900]}```"
+                adj_message = f"Continuing letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
             await thread.send(adj_message)
 
         # save message to message table

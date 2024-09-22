@@ -201,6 +201,10 @@ async def send_letter(
                         f"Continuing failed to send: \n ```{message[i : i + 1900]}```"
                     )
                 await chann.send(adj_message)
+            await interaction.response.send_message(
+                f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n Wow, what a wordsmith. We've sent the message you tried to send to your DMs.",
+                ephemeral=True,
+            )
         return
 
     # TODO this needs to be absracted when im not in a rush, for now, icky if statement

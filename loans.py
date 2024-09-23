@@ -116,9 +116,7 @@ async def submit_bid(
 
     # send the notification
     thread = letter_channel.get_thread(int(uth["personal_inbox_id"].iloc[0]))
-    message = (
-        f"""{usr} submitted ${amount} IMF bid at {interest * 100}% for {term} turns"""
-    )
+    message = f"""{usr} submitted ${amount} IMF bid at {interest}% for {term} turns"""
     await thread.send(message)
 
     await interaction.response.send_message(

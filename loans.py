@@ -108,8 +108,14 @@ async def submit_bid(
 
         # save thread
         database.create_user_inbox(str(udf["role_id"]), str(thread.id), thread.name)
+        uth = {
+            "role_id": str(interaction.user.top_role.id),
+            "personal_inbox_id": str(thread.id),
+            "personal_inbox_name": thread.name,
+        }
 
     # send the notification
+    thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
     message = f"""{usr} submitted ${amount} IMF bid at {interest}% for {term} turns"""
     await thread.send(message)
 

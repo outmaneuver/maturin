@@ -157,12 +157,21 @@ def initialize():
         "time int",
         "message varchar",
     ]
+    loans_table = [
+        "role_id varchar",
+        "interest decimal(3,2)",
+        "amount int",
+        "term int",
+        "submitted datetime",
+        "active bool",
+    ]
 
     for table, name in (
         (users_table, "users"),
         (threads_table, "threads"),
         (roles_table, "roles"),
         (messages_table, "messages"),
+        (loans_table, "loans"),
     ):
         create_table(name, table)
 

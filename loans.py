@@ -219,7 +219,7 @@ async def clear_bid(interaction: discord.Interaction):
         )
     else:
         database.execute_sql(
-            f"update loans set active = true where active is true and role_id = {trole_id}",
+            f"update loans set active = false where active is true and role_id = {trole_id}",
             commit=True,
         )
 

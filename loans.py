@@ -51,7 +51,7 @@ async def submit_bid(
         database.execute_sql(
             "update loans set interest = ?, term = ?, amount = ?, submitted = CURRENT_TIMESTAMP where role_id = ? and active is true",
             commit=True,
-            params=[interest, term, amount, trole_id],
+            params=[interest / 100, term, amount, trole_id],
         )
     # if empty create a new bid
     elif df.empty:
@@ -60,7 +60,7 @@ async def submit_bid(
             commit=True,
             params=[
                 trole_id,
-                interest,
+                interest / 100,
                 amount,
                 term,
             ],
@@ -116,7 +116,9 @@ async def submit_bid(
 
     # send the notification
     thread = letter_channel.get_thread(int(uth["personal_inbox_id"].iloc[0]))
-    message = f"""{usr} submitted ${amount} IMF bid at {interest}% for {term} turns"""
+    message = (
+        f"""{usr} submitted ${amount} IMF bid at {interest * 100}% for {term} turns"""
+    )
     await thread.send(message)
 
     await interaction.response.send_message(
@@ -172,7 +174,7 @@ async def view_bid(interaction: discord.Interaction):
         if not is_umpire:
             for i, row in df.iterrows():
                 message = f"""
-                    Your current bid is ${row['amount']} for {row['term']} turns at {row['interest']}%
+                    Your current bid is ${row['amount']} for {row['term']} turns at {row['interest'] * 100}%
                 """
                 break
             await interaction.response.send_message(
@@ -183,7 +185,7 @@ async def view_bid(interaction: discord.Interaction):
             master_message = ""
             for i, row in df.iterrows():
                 message = f"""
-                     {row['role_name']} ${row['amount']} for {row['term']} turns at {row['interest']}%\n
+                     {row['role_name']} ${row['amount']} for {row['term']} turns at {row['interest'] * 100}%\n
                 """
                 master_message += message
             await interaction.response.send_message(

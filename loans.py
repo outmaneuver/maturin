@@ -43,13 +43,13 @@ async def submit_bid(
 
     # see if bid has been submitted
     df = database.get_sql(
-        f"select * from loans where role = {trole_id} and active is true"
+        f"select * from loans where role_id = {trole_id} and active is true"
     )
 
     # if bid has been submitted already, overwrite the bid
     if not df.empty:
         database.execute_sql(
-            "update loans set interest = ?, term = ?, amount = ?, submitted = CURRENT_TIMESTAMP where role = ? and active is true",
+            "update loans set interest = ?, term = ?, amount = ?, submitted = CURRENT_TIMESTAMP where role_id = ? and active is true",
             commit=True,
             params=[interest, term, amount, trole_id],
         )

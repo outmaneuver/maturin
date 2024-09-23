@@ -197,4 +197,25 @@ async def view_bid(interaction: discord.Interaction):
     description="clear (delete) your currently submitted bid, if admin, delete all active bids in rank order",
 )
 async def clear_bid(interaction: discord.Interaction):
-    pass
+    trole_id = interaction.user.top_role.id
+    au_role = get(interaction.guild.roles, name="Assistant Umpire")
+    u_role = get(interaction.guild.roles, name="Lead Umpire")
+
+    is_umpire = False
+    if interaction.user.top_role == au_role or interaction.user.top_role == u_role:
+        is_umpire = True
+
+    if is_umpire:
+        database.execute_sql(
+            "update loans set active = false where active is true", commit=True
+        )
+    else:
+        database.execute_sql(
+            f"update loans set active = true where active is true and role_id = {trole_id}",
+            commit=True,
+        )
+
+    await interaction.response.send_message(
+        f"Cleared Loan Data",
+        ephemeral=True,
+    )

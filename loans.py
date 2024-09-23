@@ -51,7 +51,7 @@ async def submit_bid(
         database.execute_sql(
             "update loans set interest = ?, term = ?, amount = ?, submitted = CURRENT_TIMESTAMP where role_id = ? and active is true",
             commit=True,
-            params=[interest, term, amount, trole_id],
+            params=[interest / 100, term, amount, trole_id],
         )
     # if empty create a new bid
     elif df.empty:
@@ -60,7 +60,7 @@ async def submit_bid(
             commit=True,
             params=[
                 trole_id,
-                interest,
+                interest / 100,
                 amount,
                 term,
             ],

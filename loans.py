@@ -115,7 +115,7 @@ async def submit_bid(
         }
 
     # send the notification
-    thread = letter_channel.get_thread(int(uth["personal_inbox_id"]))
+    thread = letter_channel.get_thread(int(uth["personal_inbox_id"].iloc[0]))
     message = f"""{usr} submitted ${amount} IMF bid at {interest}% for {term} turns"""
     await thread.send(message)
 
@@ -172,7 +172,7 @@ async def view_bid(interaction: discord.Interaction):
         if not is_umpire:
             for i, row in df.iterrows():
                 message = f"""
-                    Your current bid is ${row['amount']} for {row['term']} turns at {row['interest']}
+                    Your current bid is ${row['amount']} for {row['term']} turns at {row['interest']}%
                 """
                 break
             await interaction.response.send_message(
@@ -183,7 +183,7 @@ async def view_bid(interaction: discord.Interaction):
             master_message = ""
             for i, row in df.iterrows():
                 message = f"""
-                     {row['role_name']} ${row['amount']} for {row['term']} turns at {row['interest']}\n
+                     {row['role_name']} ${row['amount']} for {row['term']} turns at {row['interest']}%\n
                 """
                 master_message += message
             await interaction.response.send_message(

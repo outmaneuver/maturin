@@ -40,6 +40,7 @@ async def send_letter(
     d_role = get(interaction.guild.roles, name="Diplomat")
     b_role = get(interaction.guild.roles, name="Banker")
     n_role = get(interaction.guild.roles, name="Newspaper Writer")
+    c_role = get(interaction.guild.roles, name="Captured")
     now_stamp = int(datetime.now().timestamp())
 
     # max_letter_size = 1900
@@ -78,6 +79,12 @@ async def send_letter(
         )
     else:
         chk = None
+
+    if c_role in interaction.user.roles:
+        await interaction.response.send_message(
+            f"You cannot send letters while captured. \n ```{message}```",
+            ephemeral=True,
+        )
 
     if chk is not None:
         if isinstance(recipient, discord.Role):
@@ -236,17 +243,19 @@ async def send_letter(
         else:
             sender_name = interaction.user.nick
 
-        # send letter to recipient thread
-        for i in range(0, len(message), 1900):
-            if i == 0:
-                adj_message = (
-                    f"Letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
-                )
-            else:
-                adj_message = f"Continuing letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
-            await thread.send(adj_message)
+        if c_role not in recipient.roles:
+            # send letter to recipient thread
+            for i in range(0, len(message), 1900):
+                if i == 0:
+                    adj_message = f"Letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
+                else:
+                    adj_message = f"Continuing letter from **{sender_name}**: \n```{message[i : i + 1900]}```"
+                await thread.send(adj_message)
 
         # save message to message table
+        if c_role in recipient.roles:
+            message = message + " <CAPTURED_REC>"
+
         database.create_message(udf["user_id"], rdf["user_id"], now_stamp, message)
 
         await interaction.response.send_message(

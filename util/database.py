@@ -242,8 +242,8 @@ def sync_table(table: str, cols: list, on: str):
     # upsert
     up_cols = [f"{c} = tu.{c}" for c in tmp_cols]
     sql = f"""
-        INSERT INTO {TABLE_CONVERT[table + "_table"]} ({', '.join(up_cols)})
-        SELECT {','.join([f'tu.{col}' for col in tmp_cols])}
+        INSERT INTO {TABLE_CONVERT[table + "_table"]} ({', '.join(tmp_cols)})
+        SELECT {', '.join([f'tu.{col}' for col in tmp_cols])}
         FROM tmp_{table} tu
         ON CONFLICT ({on}) DO UPDATE SET
             {', '.join(up_cols)}
@@ -284,14 +284,6 @@ def sync_messages():
         data,
     )
     # upsert
-    sql = f"""
-            MERGE INTO diplo_message as u
-            USING tmp_message tu
-            ON u.sender_id = tu.sender_id and u.recipient_id = tu.recipient_id and u.time = tu.time
-            WHEN NOT MATCHED THEN
-                INSERT (sender_id, recipient_id, time, message)
-                VALUES (tu.sender_id, tu.recipient_id, tu.time, tu.message) 
-        """
     sql = f"""
         INSERT INTO diplo_message (sender_id, recipient_id, time, message)
         SELECT sender_id, recipient_id, time, message

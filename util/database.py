@@ -44,11 +44,11 @@ TABLES = {
 }
 
 TABLES_ON = {
-    "users_table": ["user_id"],
-    "threads_table": ["user_id"],
-    "roles_table": ["role_id"],
-    "loans_table": ["role_id", "active", "submitted"],
-    "messages_table": ["sender_id", "recipient_id", "time"],
+    "users_table": "user_id",
+    "threads_table": "user_id",
+    "roles_table": "role_id",
+    "loans_table": "hash",
+    "messages_table": "hash",
 }
 
 TABLE_CONVERT = {
@@ -57,6 +57,11 @@ TABLE_CONVERT = {
     "roles_table": "diplo_role",
     "loans_table": "diplo_loan",
     "messages_table": "diplo_message",
+}
+
+HASHES = {
+    "messages": ["sender_id", "recipient_id", "time"],
+    "loans": ["role_id", "submitted"],
 }
 
 
@@ -213,10 +218,15 @@ def check_message_time(send_id, recp_id, chk_time, gap) -> int | None:
         return mx_tim + gap
 
 
-def sync_table(table: str, cols: list, on: list):
+def sync_table(table: str, cols: list, on: str):
     conn = connect_db()
-
-    data = CONN.sql(f"select * from {table}").fetchall()
+    if on != "hash":
+        data = CONN.sql(f"select * from {table}").fetchall()
+    else:
+        hash_str = [f"{h}::str" for h in HASHES[table]]
+        data = CONN.sql(
+            f"select *, hash({' || '.join(hash_str)}) from {table}"
+        ).fetchall()
     cur = conn.cursor()
     cur.execute("BEGIN")
     # create tmp table
@@ -226,23 +236,17 @@ def sync_table(table: str, cols: list, on: list):
     # load data
 
     tmp_cols = [col.split(" ")[0] for col in cols]
-    placeholders = ", ".join(["%s" for _ in cols])
     sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values %s"
     execute_values(cur, sql, data)
 
     # upsert
-    ons = [f"u.{c} = tu.{c}" for c in on]
     up_cols = [f"{c} = tu.{c}" for c in tmp_cols]
     sql = f"""
-        MERGE INTO {TABLE_CONVERT[table + "_table"]} as u
-        USING tmp_{table} tu
-        ON {",".join(ons)}
-        WHEN MATCHED THEN
-            UPDATE SET 
-                {', '.join(up_cols)}
-        WHEN NOT MATCHED THEN
-            INSERT ({','.join(tmp_cols)})
-            VALUES ({','.join([f'tu.{col}' for col in tmp_cols])}) 
+        INSERT INTO {TABLE_CONVERT[table + "_table"]} ({', '.join(up_cols)})
+        SELECT {','.join([f'tu.{col}' for col in tmp_cols])}
+        FROM tmp_{table} tu
+        ON CONFLICT ({on}) DO UPDATE SET
+            {', '.join(up_cols)}
     """
     print(sql)
     cur.execute(sql)
@@ -286,6 +290,12 @@ def sync_messages():
                 INSERT (sender_id, recipient_id, time, message)
                 VALUES (tu.sender_id, tu.recipient_id, tu.time, tu.message) 
         """
+    sql = f"""
+        INSERT INTO diplo_message (sender_id, recipient_id, time, message)
+        SELECT sender_id, recipient_id, time, message
+        FROM tmp_message tu
+        ON CONFLICT (hash) DO NOTHING
+    """
     cur.execute(sql)
     # delete temp table
     cur.execute(f"drop table tmp_message")

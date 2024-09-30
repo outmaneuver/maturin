@@ -288,8 +288,8 @@ def sync_messages():
     )
     # upsert
     sql = f"""
-        INSERT INTO diplo_message (sender_id, recipient_id, time, message)
-        SELECT sender_id, recipient_id, time, message
+        INSERT INTO diplo_message (sender_id, recipient_id, time, message, hash)
+        SELECT sender_id, recipient_id, time, message, hash
         FROM tmp_message
         ON CONFLICT (hash) DO NOTHING
     """

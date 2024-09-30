@@ -3,6 +3,7 @@ import os
 import discord
 from discord import app_commands
 from dotenv import load_dotenv
+from discord.utils import get
 
 # from testing import testing
 from diplo import diplo
@@ -47,6 +48,17 @@ async def sync_maturin(interaction, server: str):
     await interaction.response.send_message(
         f"Commands Synced with {server} Successfully!"
     )
+
+
+@admin.command(name="sync_database")
+async def sync_database(interaction):
+    u_role = get(interaction.guild.roles, name="Econ Umpire")
+    if u_role not in interaction.user.roles:
+        await interaction.response.send_message(f"Permission Denied")
+    else:
+        database.sync_all_tables()
+        database.sync_messages()
+        await interaction.response.send_message("Database synced successfully.")
 
 
 tree.add_command(diplo)

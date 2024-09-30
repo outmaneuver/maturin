@@ -9,6 +9,7 @@ python-dotenv = "*"
 duckdb = "*"
 pandas = "*"
 pytest = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

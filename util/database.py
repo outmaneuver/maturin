@@ -239,7 +239,7 @@ def sync_table(table: str, cols: list, on: list):
         ON {",".join(ons)}
         WHEN MATCHED THEN
             UPDATE SET 
-                {', \n'.join(up_cols)}
+                {','.join(up_cols)}
         WHEN NOT MATCHED THEN
             INSERT ({','.join(cols)})
             VALUES ({','.join([f'tu.{col}' for col in cols])}) 

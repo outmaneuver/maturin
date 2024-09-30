@@ -52,6 +52,7 @@ async def sync_maturin(interaction, server: str):
 
 @admin.command(name="sync_database")
 async def sync_database(interaction):
+    print(interaction.user.id)
     if interaction.user.id == os.getenv("PERSONAL_ID"):
         database.sync_all_tables()
         database.sync_messages()

@@ -244,6 +244,7 @@ def sync_table(table: str, cols: list, on: list):
             INSERT ({','.join(cols)})
             VALUES ({','.join([f'tu.{col}' for col in cols])}) 
     """
+    print(sql)
     cur.execute(sql)
     # delete temp table
     cur.execute(f"drop table tmp_{table}")

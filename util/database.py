@@ -241,8 +241,8 @@ def sync_table(table: str, cols: list, on: list):
             UPDATE SET 
                 {', '.join(up_cols)}
         WHEN NOT MATCHED THEN
-            INSERT ({','.join(cols)})
-            VALUES ({','.join([f'tu.{col}' for col in cols])}) 
+            INSERT ({','.join(tmp_cols)})
+            VALUES ({','.join([f'tu.{col}' for col in tmp_cols])}) 
     """
     print(sql)
     cur.execute(sql)

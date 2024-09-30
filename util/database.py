@@ -6,6 +6,7 @@ import pandas as pd
 from duckdb.duckdb import ParserException
 from datetime import datetime
 
+from psycopg2.extras import execute_values
 import psycopg2 as pg
 from dotenv import load_dotenv
 
@@ -226,10 +227,8 @@ def sync_table(table: str, cols: list, on: list):
 
     tmp_cols = [col.split(" ")[0] for col in cols]
     placeholders = ", ".join(["%s" for _ in cols])
-    sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values ({placeholders})"
-    print(sql)
-    print(data[:5])
-    cur.execute(sql, data)
+    sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values %s"
+    execute_values(cur, sql, data)
 
     # upsert
     ons = [f"u.{c} = tu.{c}" for c in on]
@@ -272,9 +271,10 @@ def sync_messages():
     # create tmp table
     cur.execute(f"create table tmp_message as select * from diplo_message where 1=0")
     # load data
-    cur.execute(
-        "insert into tmp_message (sender_id, recipient_id, time, message) values (%s, %s, %s, %s)",
-        vars=data,
+    execute_values(
+        cur,
+        "insert into tmp_message (sender_id, recipient_id, time, message) values %s",
+        data,
     )
     # upsert
     sql = f"""

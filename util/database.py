@@ -223,10 +223,12 @@ def sync_table(table: str, cols: list, on: list):
         f"create table tmp_{table} as select * from {TABLE_CONVERT[table + '_table']} where 1=0"
     )
     # load data
-    cur.execute(
-        f"insert into tmp_{table} ({','.join([col.split(' ')[0] for col in cols])}) values (%s{', %s'*(len(cols)-1)})",
-        vars=data,
-    )
+
+    tmp_cols = [col.split(" ")[0] for col in cols]
+    placeholders = ", ".join(["%s" for _ in cols])
+    sql = f"insert into tmp_{table} ({','.join(tmp_cols)}) values ({placeholders})"
+    cur.execute(sql, data)
+
     # upsert
     ons = [f"u.{c} = tu.{c}" for c in on]
     up_cols = [f"{c} = tu.{c}" for c in cols]

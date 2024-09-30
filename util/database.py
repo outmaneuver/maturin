@@ -227,6 +227,7 @@ def sync_table(table: str, cols: list, on: list):
     tmp_cols = [col.split(" ")[0] for col in cols]
     placeholders = ", ".join(["%s" for _ in cols])
     sql = f"insert into tmp_{table} ({','.join(tmp_cols)}) values ({placeholders})"
+    print(sql)
     cur.execute(sql, data)
 
     # upsert
@@ -271,7 +272,7 @@ def sync_messages():
     cur.execute(f"create table tmp_message as select * from diplo_message where 1=0")
     # load data
     cur.execute(
-        f"insert into tmp_message (sender_id, recipient_id, time, message) values (%s, %s, %s, %s)",
+        "insert into tmp_message (sender_id, recipient_id, time, message) values (%s, %s, %s, %s)",
         vars=data,
     )
     # upsert

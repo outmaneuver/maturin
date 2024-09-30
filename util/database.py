@@ -226,7 +226,7 @@ def sync_table(table: str, cols: list, on: list):
 
     tmp_cols = [col.split(" ")[0] for col in cols]
     placeholders = ", ".join(["%s" for _ in cols])
-    sql = f"insert into tmp_{table} ({','.join(tmp_cols)}) values ({placeholders})"
+    sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values ({placeholders})"
     print(sql)
     cur.execute(sql, data)
 

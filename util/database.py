@@ -240,11 +240,11 @@ def sync_table(table: str, cols: list, on: str):
     execute_values(cur, sql, data)
 
     # upsert
-    up_cols = [f"{c} = tu.{c}" for c in tmp_cols]
+    up_cols = [f"{c} = EXCLUDED.{c}" for c in tmp_cols]
     sql = f"""
         INSERT INTO {TABLE_CONVERT[table + "_table"]} ({', '.join(tmp_cols)})
         SELECT {', '.join([f'tu.{col}' for col in tmp_cols])}
-        FROM tmp_{table} tu
+        FROM tmp_{table}
         ON CONFLICT ({on}) DO UPDATE SET
             {', '.join(up_cols)}
     """
@@ -287,7 +287,7 @@ def sync_messages():
     sql = f"""
         INSERT INTO diplo_message (sender_id, recipient_id, time, message)
         SELECT sender_id, recipient_id, time, message
-        FROM tmp_message tu
+        FROM tmp_message
         ON CONFLICT (hash) DO NOTHING
     """
     cur.execute(sql)

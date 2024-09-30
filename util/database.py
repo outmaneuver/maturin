@@ -224,7 +224,7 @@ def sync_table(table: str, cols: list, on: list):
     )
     # load data
     cur.execute(
-        f"insert into tmp_{table} ({','.join(cols)}) values (?, ?, ?)",
+        f"insert into tmp_{table} ({','.join([col.split(' ')[0] for col in cols])}) values (?{', ?'*(len(cols)-1)})",
         vars=data,
     )
     # upsert

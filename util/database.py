@@ -240,6 +240,7 @@ def sync_table(table: str, cols: list, on: str):
 
     tmp_cols = [col.split(" ")[0] for col in cols]
     sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values %s"
+    print(sql)
     execute_values(cur, sql, data)
 
     # upsert

@@ -244,7 +244,7 @@ def sync_table(table: str, cols: list, on: str):
     sql = f"""
         INSERT INTO {TABLE_CONVERT[table + "_table"]} ({', '.join(tmp_cols)})
         SELECT {', '.join([f'tu.{col}' for col in tmp_cols])}
-        FROM tmp_{table}
+        FROM tmp_{table} tu
         ON CONFLICT ({on}) DO UPDATE SET
             {', '.join(up_cols)}
     """

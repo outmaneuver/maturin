@@ -228,6 +228,7 @@ def sync_table(table: str, cols: list, on: list):
     placeholders = ", ".join(["%s" for _ in cols])
     sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values ({placeholders})"
     print(sql)
+    print(data[:5])
     cur.execute(sql, data)
 
     # upsert

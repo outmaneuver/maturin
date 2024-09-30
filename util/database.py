@@ -248,11 +248,11 @@ def sync_table(table: str, cols: list, on: list):
 
 
 def sync_all_tables():
-    for table in ("users", "roles", "threads", "loans"):
+    for table in ("users_table", "roles_table", "threads_table", "loans_table"):
         sync_table(
             table,
-            TABLES[table + "_table"],
-            TABLES[table + "_table"],
+            TABLES[table],
+            TABLES[table],
         )
 
 

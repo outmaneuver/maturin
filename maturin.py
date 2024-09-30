@@ -54,7 +54,7 @@ async def sync_maturin(interaction, server: str):
 async def sync_database(interaction):
     print(interaction.user.id)
     print(os.getenv("PERSONAL_ID"))
-    print(interaction.user.id == os.getenv("PERSONAL_ID"))
+    print(str(interaction.user.id) == str(os.getenv("PERSONAL_ID")))
     if interaction.user.id == os.getenv("PERSONAL_ID"):
         database.sync_all_tables()
         database.sync_messages()

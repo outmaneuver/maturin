@@ -231,7 +231,7 @@ def sync_table(table: str, cols: list, on: list):
     ons = [f"u.{c} = tu.{c}" for c in on]
     up_cols = [f"{c} = tu.{c}" for c in cols]
     sql = f"""
-        MERGE INTO {TABLE_CONVERT[table]} as u
+        MERGE INTO {TABLE_CONVERT[table + "_table"]} as u
         USING tmp_{table} tu
         ON {",".join(ons)}
         WHEN MATCHED THEN
@@ -248,11 +248,11 @@ def sync_table(table: str, cols: list, on: list):
 
 
 def sync_all_tables():
-    for table in ("users_table", "roles_table", "threads_table", "loans_table"):
+    for table in ("users", "roles", "threads", "loans"):
         sync_table(
             table,
-            TABLES[table],
-            TABLES[table],
+            TABLES[table + "_table"],
+            TABLES_ON[table + "_table"],
         )
 
 

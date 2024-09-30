@@ -53,12 +53,12 @@ async def sync_maturin(interaction, server: str):
 @admin.command(name="sync_database")
 async def sync_database(interaction):
     u_role = get(interaction.guild.roles, name="Econ Umpire")
-    if u_role not in interaction.user.roles:
-        await interaction.response.send_message(f"Permission Denied")
-    else:
+    if interaction.user.id == os.getenv("PERSONAL_ID"):
         database.sync_all_tables()
         database.sync_messages()
         await interaction.response.send_message("Database synced successfully.")
+    else:
+        await interaction.response.send_message(f"Permission Denied")
 
 
 tree.add_command(diplo)

@@ -220,7 +220,7 @@ def sync_table(table: str, cols: list, on: list):
     cur.execute("BEGIN")
     # create tmp table
     cur.execute(
-        f"create table tmp_{table} as select * from {TABLE_CONVERT[table]} where 1=0"
+        f"create table tmp_{table} as select * from {TABLE_CONVERT[table + '_table']} where 1=0"
     )
     # load data
     cur.execute(

@@ -223,7 +223,7 @@ def sync_table(table: str, cols: list, on: str):
     if on != "hash":
         data = CONN.sql(f"select * from {table}").fetchall()
     else:
-        hash_str = [f"{h}::str" for h in HASHES[table]]
+        hash_str = [f"{h}::varchar" for h in HASHES[table]]
         data = CONN.sql(
             f"select *, hash({' || '.join(hash_str)}) from {table}"
         ).fetchall()
@@ -272,7 +272,7 @@ def sync_messages():
     if mx is None:
         mx = 0
     data = CONN.sql(
-        f"select *, hash(sender_id || recipient_id || time::str) from messages where time > {mx} "
+        f"select *, hash(sender_id || recipient_id || time::varchar) from messages where time > {mx} "
     ).fetchall()
     cur.execute("BEGIN")
     # create tmp table

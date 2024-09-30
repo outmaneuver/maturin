@@ -229,11 +229,14 @@ def sync_table(table: str, cols: list, on: str):
         ).fetchall()
     cur = conn.cursor()
     cur.execute("BEGIN")
+
     # create tmp table
     cur.execute(
         f"create table tmp_{table} as select * from {TABLE_CONVERT[table + '_table']} where 1=0"
     )
     # load data
+    if on == "hash":
+        cols.append("hash")
 
     tmp_cols = [col.split(" ")[0] for col in cols]
     sql = f"insert into tmp_{table} ({', '.join(tmp_cols)}) values %s"

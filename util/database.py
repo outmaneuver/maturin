@@ -271,7 +271,9 @@ def sync_messages():
     mx = cur.fetchone()[0]
     if mx is None:
         mx = 0
-    data = CONN.sql(f"select * from messages where time > {mx} ").fetchall()
+    data = CONN.sql(
+        f"select *, hash(sender_id || recipient_id || time::str) from messages where time > {mx} "
+    ).fetchall()
     cur.execute("BEGIN")
     # create tmp table
     cur.execute(f"create table tmp_message as select * from diplo_message where 1=0")

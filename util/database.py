@@ -283,7 +283,7 @@ def sync_messages():
     # load data
     execute_values(
         cur,
-        "insert into tmp_message (sender_id, recipient_id, time, message) values %s",
+        "insert into tmp_message (sender_id, recipient_id, time, message, hash) values %s",
         data,
     )
     # upsert

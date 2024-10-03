@@ -362,7 +362,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
         usql = """
             update active_roles set 
             active = false,
-            top_tole = false,
+            top_role = false,
             lost = current_date
             where user_id = ? and role_id != ?
         """

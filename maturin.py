@@ -53,6 +53,7 @@ async def sync_maturin(interaction, server: str):
 @admin.command(name="sync_database")
 async def sync_database(interaction):
     if str(interaction.user.id) == str(os.getenv("PERSONAL_ID")):
+        database.get_active_roles(guild=client.get_guild(HSKUCW))
         database.sync_all_tables()
         database.sync_messages()
         await interaction.response.send_message("Database synced successfully.")

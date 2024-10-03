@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import discord
 import duckdb
 import pandas as pd
 from duckdb.duckdb import ParserException
@@ -41,6 +42,15 @@ TABLES = {
         "submitted datetime",
         "active bool",
     ],
+    "active_roles_table": [
+        "user_id varchar",
+        "role_id varchar",
+        "top_role bool",
+        "gained datetime",
+        "lost datetime",
+        "active bool",
+        "ur_hash varchar unique",
+    ],
 }
 
 TABLES_ON = {
@@ -49,6 +59,7 @@ TABLES_ON = {
     "roles_table": "role_id",
     "loans_table": "hash",
     "messages_table": "hash",
+    "active_roles_table": "hash",
 }
 
 TABLE_CONVERT = {
@@ -57,11 +68,13 @@ TABLE_CONVERT = {
     "roles_table": "diplo_role",
     "loans_table": "diplo_loan",
     "messages_table": "diplo_message",
+    "active_roles_table": "diplo_playerrole",
 }
 
 HASHES = {
     "messages": ["sender_id", "recipient_id", "time"],
     "loans": ["role_id", "submitted"],
+    "active_roles": ["user_id", "role_id", "gained"],
 }
 
 
@@ -298,14 +311,86 @@ def sync_messages():
     conn.commit()
 
 
+def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
+    if user is not None and guild is not None:
+        return None
+    elif user is None:
+        # get list of users
+        df = CONN.sql("select distinct user_id from users").df()
+        ulst = list(df["user_id"])
+    elif guild is None:
+        # get user
+        ulst = [
+            user.id,
+        ]
+    else:
+        return None
+
+    # look for the user on the server
+    for uid in ulst:
+        mem = guild.get_member(uid)
+        if mem is None:
+            continue
+        trole = mem.top_role
+        # check if the role exists
+        if (
+            CONN.sql(
+                "select count(role_id) from roles where role_id = ?",
+                params=(trole.id),
+            ).fetchone()[0]
+            == 0
+        ):
+            create_role(trole.id, trole.name)
+        hash = CONN.sql("select hash(? || ?)", params=(uid, trole.id)).fetchone()[0]
+        isql = """
+            insert into active_roles
+            (user_id, role_id, top_role, gained, lost, active, ur_hash)
+            VALUES 
+            (?, ?, true, current_date, null, true, ?)
+            on conflict (ur_hash) do update set
+            top_role = true,
+            active = true,
+            lost = null
+        """
+        CONN.execute(isql, params=(str(uid), str(trole.id), str(hash)))
+        usql = """
+            update active_roles set 
+            active = false,
+            top_tole = false,
+            lost = current_date
+            where user_id = ? and role_id != ?
+        """
+        CONN.execute(usql, params=(str(uid), str(trole.id)))
+        for role in mem.roles:
+            if (
+                CONN.sql(
+                    "select count(role_id) from roles where role_id = ?",
+                    params=(role.id),
+                ).fetchone()[0]
+                == 0
+            ):
+                create_role(role.id, role.name)
+            nhash = CONN.sql("select hash(? || ?)", params=(uid, role.id)).fetchone()[0]
+            rsql = """
+                insert into active_roles 
+                (user_id, role_id, top_role, gained, lost, active, ur_hash)
+                VALUES (?, ?, false, current_date, null, true, ?)
+                on conflict (ur_hash) do update set
+                active = true,
+                lost = null
+            """
+            CONN.execute(rsql, params=(str(uid), str(role.id), str(nhash)))
+
+
 def initialize():
-    # function for running all the create stable statements
+    # function for running all the create table statements
     for table, name in (
         (TABLES["users_table"], "users"),
         (TABLES["threads_table"], "threads"),
         (TABLES["roles_table"], "roles"),
         (TABLES["messages_table"], "messages"),
         (TABLES["loans_table"], "loans"),
+        (TABLES["active_roles_table"], "active_roles"),
     ):
         create_table(name, table)
 

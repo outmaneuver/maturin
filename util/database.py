@@ -313,6 +313,7 @@ def sync_messages():
 
 def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
     if user is not None and guild is not None:
+        print("too many Params, Skipping Role Pull")
         return None
     elif user is None:
         # get list of users
@@ -324,6 +325,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
             user.id,
         ]
     else:
+        print("No Params, Skipping Role Pull")
         return None
 
     # look for the user on the server

@@ -314,7 +314,7 @@ def sync_messages():
     conn.commit()
 
 
-def get_active_roles(guild: discord.Guild, user: discord.Member = None):
+async def get_active_roles(guild: discord.Guild, user: discord.Member = None):
     if user is not None and guild is not None:
         print("too many Params, Skipping Role Pull")
         return None
@@ -334,7 +334,7 @@ def get_active_roles(guild: discord.Guild, user: discord.Member = None):
     print("syncing roles for", len(ulst), "users")
     # look for the user on the server
     for uid in ulst:
-        mem = guild.fetch_member(int(uid))
+        mem = await guild.fetch_member(int(uid))
         if mem is None:
             print(guild.name)
             print("skipping member", uid)

@@ -272,6 +272,7 @@ def sync_table(table: str, cols: list, on: str):
 
 def sync_all_tables():
     for table in ("users", "roles", "threads", "loans", "active_roles"):
+        print("syncing", table)
         sync_table(
             table,
             TABLES[table + "_table"],
@@ -382,6 +383,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
                 lost = null
             """
             CONN.execute(rsql, params=(str(uid), str(role.id), str(nhash)))
+    CONN.commit()
 
 
 def initialize():

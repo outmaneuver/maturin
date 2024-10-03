@@ -334,10 +334,9 @@ async def get_active_roles(guild: discord.Guild, user: discord.Member = None):
     print("syncing roles for", len(ulst), "users")
     # look for the user on the server
     for uid in ulst:
-        mem = await guild.fetch_member(int(uid))
-        if mem is None:
-            print(guild.name)
-            print("skipping member", uid)
+        try:
+            mem = await guild.fetch_member(int(uid))
+        except discord.errors.NotFound:
             continue
         trole = mem.top_role
         # check if the role exists

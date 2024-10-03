@@ -51,12 +51,14 @@ async def sync_maturin(interaction, server: str):
 
 
 @admin.command(name="sync_database")
-async def sync_database(interaction):
+async def sync_database(interaction, sync_roles: bool):
     if str(interaction.user.id) == str(os.getenv("PERSONAL_ID")):
-        await database.get_active_roles(guild=client.get_guild(int(HSKUCW)))
+        await interaction.response.defer()
+        if sync_roles:
+            await database.get_active_roles(guild=client.get_guild(int(HSKUCW)))
         database.sync_all_tables()
         database.sync_messages()
-        await interaction.response.send_message("Database synced successfully.")
+        await interaction.followup.send("Database synced successfully.")
     else:
         await interaction.response.send_message(f"Permission Denied")
 

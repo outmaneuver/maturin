@@ -356,7 +356,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
             active = true,
             lost = null
         """
-        CONN.execute(isql, params=(str(uid), str(trole.id), str(hash)))
+        execute_sql(isql, params=(str(uid), str(trole.id), str(hash)))
         usql = """
             update active_roles set 
             active = false,
@@ -364,7 +364,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
             lost = current_date
             where user_id = ? and role_id != ?
         """
-        CONN.execute(usql, params=(str(uid), str(trole.id)))
+        execute_sql(usql, params=(str(uid), str(trole.id)))
         for role in mem.roles:
             if (
                 CONN.sql(
@@ -383,7 +383,8 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
                 active = true,
                 lost = null
             """
-            CONN.execute(rsql, params=(str(uid), str(role.id), str(nhash)))
+            execute_sql(rsql, params=(str(uid), str(role.id), str(nhash)))
+        CONN.commit()
     CONN.commit()
 
 

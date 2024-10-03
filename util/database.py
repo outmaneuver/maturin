@@ -337,7 +337,7 @@ def get_active_roles(guild: discord.Guild, user: discord.Member = None):
         mem = guild.get_member(int(uid))
         if mem is None:
             print(guild.name)
-            print("skipping member", mem)
+            print("skipping member", uid)
             continue
         trole = mem.top_role
         # check if the role exists

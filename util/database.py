@@ -314,7 +314,7 @@ def sync_messages():
     conn.commit()
 
 
-def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
+def get_active_roles(guild: discord.Guild, user: discord.Member = None):
     if user is not None and guild is not None:
         print("too many Params, Skipping Role Pull")
         return None
@@ -322,7 +322,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
         # get list of users
         df = CONN.sql("select distinct user_id from users").df()
         ulst = list(df["user_id"])
-    elif guild is None:
+    elif user is not None:
         # get user
         ulst = [
             user.id,
@@ -336,6 +336,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
     for uid in ulst:
         mem = guild.get_member(int(uid))
         if mem is None:
+            print("skipping member", "")
             continue
         trole = mem.top_role
         # check if the role exists

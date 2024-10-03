@@ -240,6 +240,7 @@ def sync_table(table: str, cols: list, on: str):
         data = CONN.sql(
             f"select *, hash({' || '.join(hash_str)}) from {table}"
         ).fetchall()
+    print("syncing", len(data))
     cur = conn.cursor()
     cur.execute("BEGIN")
 
@@ -290,6 +291,7 @@ def sync_messages():
     data = CONN.sql(
         f"select *, hash(sender_id || recipient_id || time::varchar) from messages where time > {mx} "
     ).fetchall()
+    print("syncing", len(data), "messages")
     cur.execute("BEGIN")
     # create tmp table
     cur.execute(f"create table tmp_message as select * from diplo_message where 1=0")

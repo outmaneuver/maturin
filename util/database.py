@@ -271,7 +271,7 @@ def sync_table(table: str, cols: list, on: str):
 
 
 def sync_all_tables():
-    for table in ("users", "roles", "threads", "loans"):
+    for table in ("users", "roles", "threads", "loans", "active_roles"):
         sync_table(
             table,
             TABLES[table + "_table"],

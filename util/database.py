@@ -342,7 +342,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
         if (
             CONN.sql(
                 "select count(role_id) from roles where role_id = ?",
-                params=(trole.id),
+                params=[trole.id],
             ).fetchone()[0]
             == 0
         ):
@@ -358,7 +358,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
             active = true,
             lost = null
         """
-        execute_sql(isql, params=(str(uid), str(trole.id), str(hash)))
+        execute_sql(isql, params=[str(uid), str(trole.id), str(hash)])
         usql = """
             update active_roles set 
             active = false,
@@ -366,17 +366,17 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
             lost = current_date
             where user_id = ? and role_id != ?
         """
-        execute_sql(usql, params=(str(uid), str(trole.id)))
+        execute_sql(usql, params=[str(uid), str(trole.id)])
         for role in mem.roles:
             if (
                 CONN.sql(
                     "select count(role_id) from roles where role_id = ?",
-                    params=(role.id),
+                    params=[role.id],
                 ).fetchone()[0]
                 == 0
             ):
                 create_role(role.id, role.name)
-            nhash = CONN.sql("select hash(? || ?)", params=(uid, role.id)).fetchone()[0]
+            nhash = CONN.sql("select hash(? || ?)", params=[uid, role.id]).fetchone()[0]
             rsql = """
                 insert into active_roles 
                 (user_id, role_id, top_role, gained, lost, active, ur_hash)
@@ -385,7 +385,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
                 active = true,
                 lost = null
             """
-            execute_sql(rsql, params=(str(uid), str(role.id), str(nhash)))
+            execute_sql(rsql, params=[str(uid), str(role.id), str(nhash)])
         CONN.commit()
     CONN.commit()
 

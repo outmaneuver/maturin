@@ -334,7 +334,7 @@ def get_active_roles(guild: discord.Guild, user: discord.Member = None):
     print("syncing roles for", len(ulst), "users")
     # look for the user on the server
     for uid in ulst:
-        mem = guild.get_member(int(uid))
+        mem = guild.fetch_member(int(uid))
         if mem is None:
             print(guild.name)
             print("skipping member", uid)

@@ -19,7 +19,7 @@ DIADO = int(os.getenv("DIADO"))
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
 
 
-intents = discord.Intents.default()
+intents = discord.Intents.default(members=True)
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 

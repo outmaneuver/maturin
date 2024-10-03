@@ -329,6 +329,7 @@ def get_active_roles(user: discord.Member = None, guild: discord.Guild = None):
         print("No Params, Skipping Role Pull")
         return None
 
+    print("syncing ", len(ulst), "users")
     # look for the user on the server
     for uid in ulst:
         mem = guild.get_member(uid)

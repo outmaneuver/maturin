@@ -377,7 +377,8 @@ async def send_letter(
 
         if thread is None:
             interaction.followup.send(
-                f"That receipient does not exist? Ask for help. \n {message}"
+                f"That receipient does not exist? Ask for help. \n {message}",
+                ephemeral=True,
             )
             print(recipient.name)
             return

@@ -35,6 +35,7 @@ async def send_letter(
     recipient: discord.Role | discord.Member,
     message: str,
 ):
+    # TODO - these roles should also be configurable
     u_role = get(interaction.guild.roles, name="Diplo Umpire")
     s_role = get(interaction.guild.roles, name="Spectator")
     d_role = get(interaction.guild.roles, name="Diplomat")

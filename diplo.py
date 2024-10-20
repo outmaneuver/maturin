@@ -51,6 +51,8 @@ async def send_letter(
     #     )
     #     return
 
+    await interaction.response.defer()
+
     # letter channel is the base channel that all the threads will be under.
     letter_channel_id = None
     # check to make sure that a letter channel exists
@@ -81,7 +83,7 @@ async def send_letter(
         chk = None
 
     if c_role in interaction.user.roles:
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"You cannot send letters while captured. \n ```{message}```",
             ephemeral=True,
         )
@@ -95,7 +97,7 @@ async def send_letter(
             nm = recipient.nick
 
         if len(message) < 1900:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n ```{message}```",
                 ephemeral=True,
             )
@@ -109,7 +111,7 @@ async def send_letter(
                         f"Continuing failed to send: \n ```{message[i : i + 1900]}```"
                     )
                 await chann.send(adj_message)
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"Oh no! The mailman for {nm} has left already! They will be back in <t:{chk}:R> \n Wow, what a wordsmith. We've sent the message you tried to send to your DMs.",
                 ephemeral=True,
             )
@@ -258,7 +260,7 @@ async def send_letter(
 
         database.create_message(udf["user_id"], rdf["user_id"], now_stamp, message)
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Sent letter to **{recp_name}**, next in <t:{now_stamp + gp}:R>",
             ephemeral=True,
         )
@@ -373,6 +375,13 @@ async def send_letter(
         # send letter to recipient thread
         thread = letter_channel.get_thread(int(rth["personal_inbox_id"]))
 
+        if thread is None:
+            interaction.followup.send(
+                f"That receipient does not exist? Ask for help. \n {message}"
+            )
+            print(recipient.name)
+            return
+
         for i in range(0, len(message), 1900):
             if i == 0:
                 adj_message = (
@@ -389,7 +398,7 @@ async def send_letter(
             guild=interaction.guild,
         )
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Sent letter to **{recp_name}**, next in <t:{now_stamp + gp}:R>",
             ephemeral=True,
         )

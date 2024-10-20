@@ -51,6 +51,7 @@ async def send_letter(
     #     )
     #     return
 
+    # defering to give time to process - ephemeral true here to make sure all the feedback is hidden
     await interaction.response.defer(ephemeral=True)
 
     # letter channel is the base channel that all the threads will be under.
@@ -64,6 +65,7 @@ async def send_letter(
         raise ValueError
     letter_channel = interaction.guild.get_channel(int(letter_channel_id))
 
+    # checks the message timelimits. #TODO - make these conifgurable
     if isinstance(recipient, discord.Role):
         gp = 14400
         chk = database.check_message_time(
@@ -82,12 +84,14 @@ async def send_letter(
     else:
         chk = None
 
+    # check if the sender is captured
     if c_role in interaction.user.roles:
         await interaction.followup.send(
             f"You cannot send letters while captured. \n ```{message}```",
             ephemeral=True,
         )
 
+    # bounce back the message if the time limit has not passes
     if chk is not None:
         if isinstance(recipient, discord.Role):
             nm = recipient.name

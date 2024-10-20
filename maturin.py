@@ -14,7 +14,6 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 PERSONAL = int(os.getenv("PERSONAL_SERVER"))
 HSKUCW = int(os.getenv("HSKUCW"))
-DIADO = int(os.getenv("DIADO"))
 
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
 

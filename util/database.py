@@ -51,6 +51,19 @@ TABLES = {
         "active bool",
         "ur_hash varchar unique",
     ],
+    "spy_tokens_table": [
+        "role_id varchar",
+        "spy_tokens int",
+    ],
+    "orders_queue_table": [
+        "order_id int primary key auto_increment",
+        "user_id varchar",
+        "role_id varchar",
+        "order_type varchar",
+        "order_text varchar",
+        "timestamp int",
+        "turn int",
+    ],
 }
 
 TABLES_ON = {
@@ -60,6 +73,7 @@ TABLES_ON = {
     "loans_table": "hash",
     "messages_table": "hash",
     "active_roles_table": "hash",
+    "orders_queue": "order_id",
 }
 
 TABLE_CONVERT = {
@@ -188,6 +202,37 @@ def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
         sql,
         commit=True,
         params=[str(id), str(personal_inbox_id), str(personal_inbox_name)],
+    )
+
+
+def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
+    sql = """
+        select
+            order_id,
+            user_id,
+            role_id,
+            order_type,
+            order_text,
+            timestamp,
+            turn
+        from orders_queue
+        where 1=1 
+            and (order_id = ? or user_id = ? or role_id = ?)
+            and turn = ?
+            and active = ?
+    """
+    res = execute_sql(sql, params=(order_id, user_id, role_id, turn, active))
+
+
+def create_order(order_type, order_text, turn, user_id=None, role_id=None):
+    sql = """
+        insert in to orders_queue (user_id, role_id, order_type, order_text, timestamp, turn)
+        values (?, ?, ?, ?, CURRENT_DATE, ?)
+    """
+    execute_sql(
+        sql,
+        commit=True,
+        params=[str(user_id), str(role_id), order_type, order_text, turn],
     )
 
 
@@ -400,6 +445,8 @@ def initialize():
         (TABLES["messages_table"], "messages"),
         (TABLES["loans_table"], "loans"),
         (TABLES["active_roles_table"], "active_roles"),
+        (TABLES["orders_queue_table"], "orders_queue"),
+        (TABLES["spy_tokens_table"], "spy_tokens"),
     ):
         create_table(name, table)
 

@@ -8,7 +8,7 @@ from util import database
 
 PERSONAL = int(os.getenv("PERSONAL_SERVER"))
 HSKUCW = int(os.getenv("HSKUCW"))
-DIADO = int(os.getenv("DIADO"))
+
 
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
 
@@ -16,7 +16,7 @@ LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
 loans = app_commands.Group(
     name="loans",
     description="Commands for loan management",
-    guild_ids=[PERSONAL, DIADO, HSKUCW],
+    guild_ids=[PERSONAL, HSKUCW],
 )
 
 

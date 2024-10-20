@@ -51,7 +51,7 @@ async def send_letter(
     #     )
     #     return
 
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
 
     # letter channel is the base channel that all the threads will be under.
     letter_channel_id = None

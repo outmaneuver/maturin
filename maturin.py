@@ -53,7 +53,7 @@ async def sync_maturin(interaction, server: str):
 @admin.command(name="sync_database")
 async def sync_database(interaction, sync_roles: bool):
     if str(interaction.user.id) == str(os.getenv("PERSONAL_ID")):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         if sync_roles:
             await database.get_active_roles(guild=client.get_guild(int(HSKUCW)))
         database.sync_all_tables()

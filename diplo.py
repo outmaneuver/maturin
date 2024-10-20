@@ -393,7 +393,7 @@ async def send_letter(
 
         # save message to message table
         database.create_message(udf["role_id"], rdf["role_id"], now_stamp, message)
-        database.get_active_roles(
+        await database.get_active_roles(
             user=interaction.user,
             guild=interaction.guild,
         )

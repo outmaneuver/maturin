@@ -270,6 +270,8 @@ async def send_letter(
             ephemeral=True,
         )
 
+        database.sync_messages()
+
     ### ROLES WORKFLOW
     elif isinstance(recipient, discord.Role):
         # check for sender data
@@ -401,10 +403,11 @@ async def send_letter(
         database.create_message(udf["role_id"], rdf["role_id"], now_stamp, message)
         await database.get_active_roles(
             user=interaction.user,
-            guild=interaction.guild,
         )
 
         await interaction.followup.send(
             f"Sent letter to **{recp_name}**, next in <t:{now_stamp + gp}:R>",
             ephemeral=True,
         )
+
+        database.sync_messages()

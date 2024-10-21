@@ -60,7 +60,7 @@ TABLES = {
         "user_id varchar",
         "role_id varchar",
         "order_type varchar",
-        "order_text varchar",
+        "order_scope varchar" "order_text varchar",
         "timestamp int",
         "turn int",
     ],
@@ -138,7 +138,7 @@ def execute_sql(sql: str, commit: bool = True, params: list = None):
         CONN.commit()
 
 
-def get_sql(sql) -> pd.DataFrame:
+def get_sql(sql, params: list = None) -> pd.DataFrame:
     """
     Executes an SQL query on the connected database.
 
@@ -149,7 +149,10 @@ def get_sql(sql) -> pd.DataFrame:
         A pandas DataFrame containing the results of the query.
     """
     try:
-        df = CONN.sql(sql).df()
+        if params is not None:
+            df = CONN.sql(sql, params).df()
+        else:
+            df = CONN.sql(sql).df()
     except ParserException:
         print(sql)
         raise ParserException()
@@ -212,27 +215,38 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
             user_id,
             role_id,
             order_type,
+            order_scope,
             order_text,
             timestamp,
-            turn
+            turn,
+            active
         from orders_queue
         where 1=1 
-            and (order_id = ? or user_id = ? or role_id = ?)
+            and (
+                (user_id = ? and order_scope = 'user')
+                or (role_id = ? and order_scope = 'role')
+                or (order_id = ? and (user_id = ? or (role_id = ? and order_scope = 'role')))
+                ) 
             and turn = ?
             and active = ?
     """
-    res = execute_sql(sql, params=(order_id, user_id, role_id, turn, active))
+    res = get_sql(
+        sql, params=[user_id, role_id, order_id, user_id, role_id, turn, active]
+    )
+    return res
 
 
-def create_order(order_type, order_text, turn, user_id=None, role_id=None):
+def create_order(
+    order_type, order_text, turn, user_id=None, role_id=None, order_scope=None
+):
     sql = """
-        insert in to orders_queue (user_id, role_id, order_type, order_text, timestamp, turn)
-        values (?, ?, ?, ?, CURRENT_DATE, ?)
+        insert in to orders_queue (user_id, role_id, order_type, order_scope, order_text, timestamp, turn)
+        values (?, ?, ?, ?, ?, CURRENT_DATE, ?)
     """
     execute_sql(
         sql,
         commit=True,
-        params=[str(user_id), str(role_id), order_type, order_text, turn],
+        params=[str(user_id), str(role_id), order_type, order_scope, order_text, turn],
     )
 
 

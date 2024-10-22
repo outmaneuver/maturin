@@ -9,6 +9,7 @@ from discord.utils import get
 from diplo import diplo
 from loans import loans
 from util import database
+from orders import orders
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -66,5 +67,6 @@ tree.add_command(diplo)
 # tree.add_command(testing)
 tree.add_command(admin)
 tree.add_command(loans)
+tree.add_command(orders)
 
 client.run(TOKEN)

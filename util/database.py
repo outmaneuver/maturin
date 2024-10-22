@@ -237,17 +237,33 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
     return res
 
 
+def get_max_order_pk():
+    sql = """
+        select max(order_id) as mxid from orders_queue
+    """
+    res = get_sql(sql)
+    return res.iloc[0]["mxid"]
+
+
 def create_order(
     order_type, order_text, turn, user_id=None, role_id=None, order_scope=None
 ):
     sql = """
-        insert in to orders_queue (user_id, role_id, order_type, order_scope, order_text, timestamp, turn)
-        values (?, ?, ?, ?, ?, CURRENT_DATE, ?)
+        insert in to orders_queue (order_id, user_id, role_id, order_type, order_scope, order_text, timestamp, turn)
+        values (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)
     """
     execute_sql(
         sql,
         commit=True,
-        params=[str(user_id), str(role_id), order_type, order_scope, order_text, turn],
+        params=[
+            get_max_order_pk() + 1,
+            str(user_id),
+            str(role_id),
+            order_type,
+            order_scope,
+            order_text,
+            turn,
+        ],
     )
 
 

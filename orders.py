@@ -27,7 +27,11 @@ orders = app_commands.Group(
     order_as="user or role",
 )
 async def issue_order(
-    interaction: discord.Interaction, turn, order_type, order, order_as="User"
+    interaction: discord.Interaction,
+    turn: int,
+    order_type: str,
+    order: str,
+    order_as: str = "User",
 ):
     # defer in case db is slow
     await interaction.response.defer(ephemeral=True)

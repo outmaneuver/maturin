@@ -56,7 +56,7 @@ TABLES = {
         "spy_tokens int",
     ],
     "orders_queue_table": [
-        "order_id int primary key auto_increment",
+        "order_id int primary key",
         "user_id varchar",
         "role_id varchar",
         "order_type varchar",

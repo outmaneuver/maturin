@@ -256,13 +256,13 @@ def create_order(
         sql,
         commit=True,
         params=[
-            get_max_order_pk() + 1,
+            int(get_max_order_pk()) + 1,
             str(user_id),
             str(role_id),
-            order_type,
-            order_scope,
-            order_text,
-            turn,
+            str(order_type),
+            str(order_scope),
+            str(order_text),
+            int(turn),
         ],
     )
 
@@ -391,10 +391,7 @@ def sync_messages():
 
 
 async def get_active_roles(guild: discord.Guild, user: discord.Member = None):
-    if user is not None and guild is not None:
-        print("too many Params, Skipping Role Pull")
-        return None
-    elif user is None:
+    if user is None:
         # get list of users
         df = CONN.sql("select distinct user_id from users").df()
         ulst = list(df["user_id"])

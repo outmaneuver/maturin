@@ -237,12 +237,18 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
     return res
 
 
-def get_max_order_pk():
+def get_max_order_pk() -> int:
     sql = """
         select max(order_id) as mxid from orders_queue
     """
     res = get_sql(sql)
-    return res.iloc[0]["mxid"]
+    if res.shape[0] == 0:
+        return 0
+    try:
+        x = int(res.iloc[0]["mxid"])
+    except:
+        raise ValueError("Cannot recover primary key from orders table")
+    return int(res.iloc[0]["mxid"])
 
 
 def create_order(

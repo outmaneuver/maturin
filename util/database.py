@@ -153,7 +153,7 @@ def get_sql(sql, params: list = None) -> pd.DataFrame:
     """
     try:
         if params is not None:
-            df = CONN.sql(sql, params).df()
+            df = CONN.sql(sql, params=params).df()
         else:
             df = CONN.sql(sql).df()
     except ParserException:

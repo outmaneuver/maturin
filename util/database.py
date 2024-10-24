@@ -247,7 +247,9 @@ def get_max_order_pk() -> int:
     try:
         x = int(res.iloc[0]["mxid"])
     except:
-        raise ValueError("Cannot recover primary key from orders table")
+        raise ValueError(
+            f"Cannot recover primary key from orders table {res.iloc[0]['mxid']}"
+        )
     return int(res.iloc[0]["mxid"])
 
 

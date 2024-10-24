@@ -1,4 +1,5 @@
 import os
+from multiprocessing.managers import Value
 from typing import List
 
 import discord
@@ -251,10 +252,13 @@ def get_max_order_pk() -> int:
         return 0
     try:
         x = int(res.iloc[0]["mxid"])
-    except:
-        raise ValueError(
-            f"Cannot recover primary key from orders table {res.iloc[0]['mxid']}"
+    except ValueError as e:
+        print(
+            f"Cannot recover primary key from orders table",
+            res.iloc[0]["mxid"],
+            type(res.iloc[0]["mxid"]),
         )
+        raise ValueError(e)
     return int(res.iloc[0]["mxid"])
 
 

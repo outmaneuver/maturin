@@ -211,7 +211,7 @@ def create_user_inbox(id, personal_inbox_id, personal_inbox_name):
     )
 
 
-def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
+def get_orders(turn, order_id=None, user_id=None, role_id=None):
     sql = """
         select
             order_id,
@@ -231,11 +231,8 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None, active=True):
                 or (order_id = ? and (user_id = ? or (role_id = ? and order_scope = 'role')))
                 ) 
             and turn = ?
-            and active = ?
     """
-    res = get_sql(
-        sql, params=[user_id, role_id, order_id, user_id, role_id, turn, active]
-    )
+    res = get_sql(sql, params=[user_id, role_id, order_id, user_id, role_id, turn])
     return res
 
 

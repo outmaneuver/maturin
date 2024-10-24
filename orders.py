@@ -75,9 +75,8 @@ async def issue_order(
 @orders.command(name="view_orders", description="view orders")
 @app_commands.describe(
     turn="The turn number you want the order to be in effect for",
-    active="Leave blank or true if you want to just see active orders. Set to false if you want to see all orders",
 )
-async def view_orders(interaction: discord.Interaction, turn: int, active: bool = True):
+async def view_orders(interaction: discord.Interaction, turn: int):
     # defer in case db is slow
     await interaction.response.defer(ephemeral=True)
 
@@ -85,9 +84,7 @@ async def view_orders(interaction: discord.Interaction, turn: int, active: bool 
     trol = interaction.user.top_role
 
     # get orders
-    orders_df = get_orders(
-        turn, active=bool(active), user_id=interaction.user.id, role_id=trol.id
-    )
+    orders_df = get_orders(turn, user_id=interaction.user.id, role_id=trol.id)
 
     # return orders
     message = []
@@ -100,14 +97,12 @@ async def view_orders(interaction: discord.Interaction, turn: int, active: bool 
     await interaction.followup.send(message, ephemeral=True)
 
 
-@orders.command(name="toggle_order", description="toggle the status of an order")
+@orders.command(name="delete_order", description="delete and order. No recovery.")
 @app_commands.describe(
     turn="The turn number of the order",
     order_id="The order id",
 )
-async def toggle_order_status(
-    interaction: discord.Interaction, order_id: int, turn: int
-):
+async def delete_order(interaction: discord.Interaction, order_id: int, turn: int):
     await interaction.response.defer(ephemeral=True)
 
     orders_df = get_orders(
@@ -126,13 +121,14 @@ async def toggle_order_status(
     index, order = orders_df.itterrows()[0]
 
     if order["user_id"] == interaction.user.id:
-        if order["active"] is False:
-            new_status = True
-        else:
-            new_status = False
         database.execute_sql(
-            f"update orders_queue set active=? where id=?",
-            params=[new_status, order["order_id"]],
+            f"delete from orders_queue where id=?",
+            params=[
+                order["order_id"],
+            ],
         )
 
         await interaction.followup.send(f"Updated order id {order['order_id']}")
+
+    else:
+        await interaction.followup.send(f"You cannot delete someone else's orders")

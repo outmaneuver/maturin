@@ -242,7 +242,12 @@ def get_max_order_pk() -> int:
         select max(order_id) as mxid from orders_queue
     """
     res = get_sql(sql)
-    if res.shape[0] == 0:
+    if (
+        res.shape[0] == 0
+        or res.iloc[0]["mxid"] == "nan"
+        or res.iloc[0]["mxid"] == ""
+        or res.iloc[0]["mxid"] == None
+    ):
         return 0
     try:
         x = int(res.iloc[0]["mxid"])

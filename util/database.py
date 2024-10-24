@@ -263,7 +263,7 @@ def create_order(
 ):
     sql = """
         insert into orders_queue (order_id, user_id, role_id, order_type, order_scope, order_text, timestamp, turn)
-        values (?, ?, ?, ?, ?, ?, CURRENT_DATE, ?)
+        values (?, ?, ?, ?, ?, ?, ?, ?)
     """
     execute_sql(
         sql,
@@ -275,6 +275,7 @@ def create_order(
             str(order_type),
             str(order_scope),
             str(order_text),
+            int(datetime.now().timestamp()),
             int(turn),
         ],
     )

@@ -7,6 +7,7 @@ import duckdb
 import pandas as pd
 from duckdb.duckdb import ParserException
 from datetime import datetime
+import numpy as np
 
 from psycopg2.extras import execute_values
 import psycopg2 as pg
@@ -243,12 +244,7 @@ def get_max_order_pk() -> int:
         select max(order_id) as mxid from orders_queue
     """
     res = get_sql(sql)
-    if (
-        res.shape[0] == 0
-        or res.iloc[0]["mxid"] == "nan"
-        or res.iloc[0]["mxid"] == ""
-        or res.iloc[0]["mxid"] == None
-    ):
+    if res.shape[0] == 0 or np.isnan(res.iloc[0]["mxid"]):
         return 0
     try:
         x = int(res.iloc[0]["mxid"])

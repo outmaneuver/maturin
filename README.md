@@ -9,7 +9,7 @@ install the required libraries: `pipenv install`
 
 run the app: `pipenv run python maturin.py`
 
-Servers are currently hardcoded, don't know if I will ever change that. If you want to use it on another server, change your `.env ` file to override the `PERSONAL` id.
+Servers are now configurable through the `.env` file. If you want to use it on another server, change your `.env` file to override the `PERSONAL_SERVER` and `HSKUCW` IDs.
 
 The following options can be set in a `.env` file:
 
@@ -24,6 +24,12 @@ PG_PASS=
 PG_PORT=
 PG_DB=
 PERSONAL_ID=
+DIPLO_UMPIRE_ROLE=
+SPECTATOR_ROLE=
+DIPLOMAT_ROLE=
+BANKER_ROLE=
+NEWSPAPER_WRITER_ROLE=
+CAPTURED_ROLE=
 ```
 
 Discord token is the token for your application, as given by discord. You will also need to have the correct permissions set. I run under admin b/c I control the code... your trust may vary.
@@ -37,3 +43,36 @@ LETTER_CHANNEL is the channel that you want letter threads to be added under.
 The PG options are for syncing the bot database with another database. The bot database is an embedded duck db instance, but that means to look at the data while the bot is running it needs to be extracted.
 
 PERSONAL_ID is your personal discord ID, and is used to permissions check some functions as an override.
+
+DIPLO_UMPIRE_ROLE is the role for the Diplo Umpire.
+
+SPECTATOR_ROLE is the role for the Spectator.
+
+DIPLOMAT_ROLE is the role for the Diplomat.
+
+BANKER_ROLE is the role for the Banker.
+
+NEWSPAPER_WRITER_ROLE is the role for the Newspaper Writer.
+
+CAPTURED_ROLE is the role for the Captured.
+
+#### Example .env file
+
+```
+DISCORD_TOKEN=your_discord_token
+PERSONAL_SERVER=your_personal_server_id
+HSKUCW=your_hskucw_server_id
+LETTER_CHANNEL=your_letter_channel
+PG_HOST=your_pg_host
+PG_USER=your_pg_user
+PG_PASS=your_pg_pass
+PG_PORT=your_pg_port
+PG_DB=your_pg_db
+PERSONAL_ID=your_personal_id
+DIPLO_UMPIRE_ROLE=your_diplo_umpire_role
+SPECTATOR_ROLE=your_spectator_role
+DIPLOMAT_ROLE=your_diplomat_role
+BANKER_ROLE=your_banker_role
+NEWSPAPER_WRITER_ROLE=your_newspaper_writer_role
+CAPTURED_ROLE=your_captured_role
+```

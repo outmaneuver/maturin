@@ -221,8 +221,7 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None):
             order_scope,
             order_text,
             timestamp,
-            turn,
-            active
+            turn
         from orders_queue
         where 1=1 
             and (
@@ -232,7 +231,27 @@ def get_orders(turn, order_id=None, user_id=None, role_id=None):
                 ) 
             and turn = ?
     """
-    res = get_sql(sql, params=[user_id, role_id, order_id, user_id, role_id, turn])
+    sql2 = """
+        select 
+            order_id,
+            user_id,
+            role_id,
+            order_type,
+            order_scope,
+            order_text,
+            timestamp,
+            turn
+        from orders_queue
+        where 1=1
+            and turn = ?
+    """
+    res = get_sql(
+        sql2,
+        params=[
+            turn,
+        ],
+    )
+
     return res
 
 
@@ -488,6 +507,41 @@ def initialize():
         (TABLES["spy_tokens_table"], "spy_tokens"),
     ):
         create_table(name, table)
+
+
+def create_and_manage_thread(
+    interaction: discord.Interaction, thread_name: str, message: str = None
+) -> discord.Thread:
+    """
+    Creates and manages a thread in a specified channel.
+
+    Args:
+        interaction: The interaction object from Discord.
+        thread_name: The name of the thread to be created.
+        message: An optional message to be sent in the thread.
+
+    Returns:
+        The created thread object.
+    """
+    letter_channel_id = None
+    for channel in interaction.guild.channels:
+        if channel.name == LETTER_CHANNEL:
+            letter_channel_id = channel.id
+
+    if letter_channel_id is None:
+        raise ValueError("Letter channel not found")
+
+    letter_channel = interaction.guild.get_channel(int(letter_channel_id))
+    thread = letter_channel.get_thread(thread_name)
+
+    if thread is None:
+        thread = await letter_channel.create_thread(
+            name=thread_name,
+            message=message,
+            invitable=False,
+        )
+
+    return thread
 
 
 if __name__ == "__main__":

@@ -17,6 +17,12 @@ PERSONAL = int(os.getenv("PERSONAL_SERVER"))
 HSKUCW = int(os.getenv("HSKUCW"))
 
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
+DIPLO_UMPIRE_ROLE = os.getenv("DIPLO_UMPIRE_ROLE")
+SPECTATOR_ROLE = os.getenv("SPECTATOR_ROLE")
+DIPLOMAT_ROLE = os.getenv("DIPLOMAT_ROLE")
+BANKER_ROLE = os.getenv("BANKER_ROLE")
+NEWSPAPER_WRITER_ROLE = os.getenv("NEWSPAPER_WRITER_ROLE")
+CAPTURED_ROLE = os.getenv("CAPTURED_ROLE")
 
 
 intents = discord.Intents.default()

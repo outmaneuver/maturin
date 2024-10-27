@@ -30,6 +30,8 @@ DIPLOMAT_ROLE=
 BANKER_ROLE=
 NEWSPAPER_WRITER_ROLE=
 CAPTURED_ROLE=
+ASSISTANT_UMPIRE_ROLE=
+LEAD_UMPIRE_ROLE=
 ```
 
 Discord token is the token for your application, as given by discord. You will also need to have the correct permissions set. I run under admin b/c I control the code... your trust may vary.
@@ -43,18 +45,6 @@ LETTER_CHANNEL is the channel that you want letter threads to be added under.
 The PG options are for syncing the bot database with another database. The bot database is an embedded duck db instance, but that means to look at the data while the bot is running it needs to be extracted.
 
 PERSONAL_ID is your personal discord ID, and is used to permissions check some functions as an override.
-
-DIPLO_UMPIRE_ROLE is the role name for the Diplo Umpire.
-
-SPECTATOR_ROLE is the role name for the Spectator.
-
-DIPLOMAT_ROLE is the role name for the Diplomat.
-
-BANKER_ROLE is the role name for the Banker.
-
-NEWSPAPER_WRITER_ROLE is the role name for the Newspaper Writer.
-
-CAPTURED_ROLE is the role name for the Captured.
 
 #### Example .env file
 
@@ -75,4 +65,6 @@ DIPLOMAT_ROLE=your_diplomat_role
 BANKER_ROLE=your_banker_role
 NEWSPAPER_WRITER_ROLE=your_newspaper_writer_role
 CAPTURED_ROLE=your_captured_role
+ASSISTANT_UMPIRE_ROLE=your_assistant_umpire_role
+LEAD_UMPIRE_ROLE=your_lead_umpire_role
 ```

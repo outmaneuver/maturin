@@ -11,9 +11,12 @@ load_dotenv()
 PERSONAL = int(os.getenv("PERSONAL_SERVER"))
 HSKUCW = int(os.getenv("HSKUCW"))
 
-
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
 
+DIPLO_UMPIRE_ROLE = os.getenv("DIPLO_UMPIRE_ROLE")
+SPECTATOR_ROLE = os.getenv("SPECTATOR_ROLE")
+ASSISTANT_UMPIRE_ROLE = os.getenv("ASSISTANT_UMPIRE_ROLE")
+LEAD_UMPIRE_ROLE = os.getenv("LEAD_UMPIRE_ROLE")
 
 loans = app_commands.Group(
     name="loans",
@@ -23,8 +26,8 @@ loans = app_commands.Group(
 
 
 async def send_bid_notification(interaction, message):
-    u_role = get(interaction.guild.roles, name="Diplo Umpire")
-    s_role = get(interaction.guild.roles, name="Spectator")
+    u_role = get(interaction.guild.roles, name=DIPLO_UMPIRE_ROLE)
+    s_role = get(interaction.guild.roles, name=SPECTATOR_ROLE)
 
     letter_channel_id = None
     for channel in interaction.guild.channels:
@@ -124,8 +127,8 @@ async def submit_bid(
 )
 async def view_bid(interaction: discord.Interaction):
     trole_id = interaction.user.top_role.id
-    au_role = get(interaction.guild.roles, name="Assistant Umpire")
-    u_role = get(interaction.guild.roles, name="Lead Umpire")
+    au_role = get(interaction.guild.roles, name=ASSISTANT_UMPIRE_ROLE)
+    u_role = get(interaction.guild.roles, name=LEAD_UMPIRE_ROLE)
 
     is_umpire = False
     if interaction.user.top_role == au_role or interaction.user.top_role == u_role:
@@ -196,8 +199,8 @@ async def view_bid(interaction: discord.Interaction):
 )
 async def clear_bid(interaction: discord.Interaction):
     trole_id = interaction.user.top_role.id
-    au_role = get(interaction.guild.roles, name="Assistant Umpire")
-    u_role = get(interaction.guild.roles, name="Lead Umpire")
+    au_role = get(interaction.guild.roles, name=ASSISTANT_UMPIRE_ROLE)
+    u_role = get(interaction.guild.roles, name=LEAD_UMPIRE_ROLE)
 
     is_umpire = False
     if interaction.user.top_role == au_role or interaction.user.top_role == u_role:

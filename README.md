@@ -44,17 +44,17 @@ The PG options are for syncing the bot database with another database. The bot d
 
 PERSONAL_ID is your personal discord ID, and is used to permissions check some functions as an override.
 
-DIPLO_UMPIRE_ROLE is the role for the Diplo Umpire.
+DIPLO_UMPIRE_ROLE is the role name for the Diplo Umpire.
 
-SPECTATOR_ROLE is the role for the Spectator.
+SPECTATOR_ROLE is the role name for the Spectator.
 
-DIPLOMAT_ROLE is the role for the Diplomat.
+DIPLOMAT_ROLE is the role name for the Diplomat.
 
-BANKER_ROLE is the role for the Banker.
+BANKER_ROLE is the role name for the Banker.
 
-NEWSPAPER_WRITER_ROLE is the role for the Newspaper Writer.
+NEWSPAPER_WRITER_ROLE is the role name for the Newspaper Writer.
 
-CAPTURED_ROLE is the role for the Captured.
+CAPTURED_ROLE is the role name for the Captured.
 
 #### Example .env file
 

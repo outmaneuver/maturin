@@ -11,9 +11,9 @@ load_dotenv()
 PERSONAL = int(os.getenv("PERSONAL_SERVER"))
 HSKUCW = int(os.getenv("HSKUCW"))
 
+
 LETTER_CHANNEL = os.getenv("LETTER_CHANNEL")
-DIPLO_UMPIRE_ROLE = os.getenv("DIPLO_UMPIRE_ROLE")
-SPECTATOR_ROLE = os.getenv("SPECTATOR_ROLE")
+
 
 loans = app_commands.Group(
     name="loans",
@@ -23,8 +23,8 @@ loans = app_commands.Group(
 
 
 async def send_bid_notification(interaction, message):
-    u_role = get(interaction.guild.roles, name=DIPLO_UMPIRE_ROLE)
-    s_role = get(interaction.guild.roles, name=SPECTATOR_ROLE)
+    u_role = get(interaction.guild.roles, name="Diplo Umpire")
+    s_role = get(interaction.guild.roles, name="Spectator")
 
     letter_channel_id = None
     for channel in interaction.guild.channels:
